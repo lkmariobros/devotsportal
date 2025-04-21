@@ -9,36 +9,45 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      users: {
+      profiles: {
         Row: {
           id: string
-          email: string
           created_at: string
-          role: string
+          updated_at: string
+          email: string
+          full_name: string | null
+          avatar_url: string | null
+          role: string | null
         }
         Insert: {
-          id?: string
-          email: string
+          id: string
           created_at?: string
-          role?: string
+          updated_at?: string
+          email: string
+          full_name?: string | null
+          avatar_url?: string | null
+          role?: string | null
         }
         Update: {
           id?: string
-          email?: string
           created_at?: string
-          role?: string
+          updated_at?: string
+          email?: string
+          full_name?: string | null
+          avatar_url?: string | null
+          role?: string | null
         }
       }
-      // Add other tables as needed
+      // Add more tables as needed
     }
     Views: {
-      // Define your views here
+      [_ in never]: never
     }
     Functions: {
-      // Define your functions here
+      [_ in never]: never
     }
     Enums: {
-      // Define your enums here
+      [_ in never]: never
     }
   }
 }
