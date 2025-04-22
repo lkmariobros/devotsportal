@@ -22,61 +22,45 @@ import {
   RiBardLine,
   RiUserFollowLine,
   RiCodeSSlashLine,
-  RiLoginCircleLine,
-  RiLayoutLeftLine,
   RiSettings3Line,
   RiLeafLine,
   RiLogoutBoxLine,
+  RiMoneyDollarCircleLine,
 } from "@remixicon/react";
 import { usePathname } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
-// App navigation data
-const appNavData = {
+// Agent navigation data
+const agentNavData = {
   teams: [
     {
-      name: "App Portal",
+      name: "Agent Portal",
       logo: "https://res.cloudinary.com/dlzlfasou/image/upload/v1741345507/logo-01_kp2j8x.png",
     },
   ],
   navMain: [
     {
-      title: "Sections",
+      title: "My Account",
       items: [
         {
           title: "Dashboard",
-          url: "/app/dashboard",
+          url: "/agent/dashboard",
           icon: RiScanLine,
         },
         {
-          title: "Insights",
-          url: "/app/insights",
+          title: "My Transactions",
+          url: "/agent/transactions",
           icon: RiBardLine,
         },
         {
-          title: "Contacts",
-          url: "/app/contacts",
+          title: "My Clients",
+          url: "/agent/clients",
           icon: RiUserFollowLine,
         },
         {
-          title: "Tools",
-          url: "/app/tools",
-          icon: RiCodeSSlashLine,
-        },
-        {
-          title: "Integration",
-          url: "/app/integration",
-          icon: RiLoginCircleLine,
-        },
-        {
-          title: "Layouts",
-          url: "/app/layouts",
-          icon: RiLayoutLeftLine,
-        },
-        {
-          title: "Reports",
-          url: "/app/reports",
-          icon: RiLeafLine,
+          title: "Commission",
+          url: "/agent/commission",
+          icon: RiMoneyDollarCircleLine,
         },
       ],
     },
@@ -84,13 +68,13 @@ const appNavData = {
       title: "Other",
       items: [
         {
-          title: "Settings",
-          url: "/app/settings",
+          title: "Profile Settings",
+          url: "/agent/settings",
           icon: RiSettings3Line,
         },
         {
           title: "Help Center",
-          url: "/app/help",
+          url: "/agent/help",
           icon: RiLeafLine,
         },
       ],
@@ -98,7 +82,7 @@ const appNavData = {
   ],
 };
 
-export function AppSidebar({ isAdmin = false, ...props }: React.ComponentProps<typeof Sidebar> & { isAdmin?: boolean }) {
+export function AgentSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const [activePath, setActivePath] = React.useState(pathname || "");
   const [isSigningOut, setIsSigningOut] = React.useState(false);
@@ -123,12 +107,12 @@ export function AppSidebar({ isAdmin = false, ...props }: React.ComponentProps<t
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={appNavData.teams} isAdmin={isAdmin} />
+        <TeamSwitcher teams={agentNavData.teams} />
         <hr className="border-t border-border mx-2 -mt-px" />
         <SearchForm className="mt-3" />
       </SidebarHeader>
       <SidebarContent>
-        {appNavData.navMain.map((group) => (
+        {agentNavData.navMain.map((group) => (
           <SidebarGroup key={group.title}>
             <SidebarGroupLabel className="uppercase text-muted-foreground/60">
               {group.title}

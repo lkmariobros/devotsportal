@@ -28,14 +28,14 @@ import {
   RiLeafLine,
   RiLogoutBoxLine,
 } from "@remixicon/react";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
-// App navigation data
-const appNavData = {
+// Admin navigation data
+const adminNavData = {
   teams: [
     {
-      name: "App Portal",
+      name: "Admin Portal",
       logo: "https://res.cloudinary.com/dlzlfasou/image/upload/v1741345507/logo-01_kp2j8x.png",
     },
   ],
@@ -45,37 +45,37 @@ const appNavData = {
       items: [
         {
           title: "Dashboard",
-          url: "/app/dashboard",
+          url: "/admin-dashboard",
           icon: RiScanLine,
         },
         {
-          title: "Insights",
-          url: "/app/insights",
+          title: "Transactions",
+          url: "/transactions",
           icon: RiBardLine,
         },
         {
-          title: "Contacts",
-          url: "/app/contacts",
+          title: "Agents",
+          url: "/agents",
           icon: RiUserFollowLine,
         },
         {
           title: "Tools",
-          url: "/app/tools",
+          url: "/admin/tools",
           icon: RiCodeSSlashLine,
         },
         {
           title: "Integration",
-          url: "/app/integration",
+          url: "/admin/integration",
           icon: RiLoginCircleLine,
         },
         {
           title: "Layouts",
-          url: "/app/layouts",
+          url: "/admin/layouts",
           icon: RiLayoutLeftLine,
         },
         {
           title: "Reports",
-          url: "/app/reports",
+          url: "/admin/reports",
           icon: RiLeafLine,
         },
       ],
@@ -85,12 +85,12 @@ const appNavData = {
       items: [
         {
           title: "Settings",
-          url: "/app/settings",
+          url: "/admin/settings",
           icon: RiSettings3Line,
         },
         {
           title: "Help Center",
-          url: "/app/help",
+          url: "/admin/help",
           icon: RiLeafLine,
         },
       ],
@@ -98,13 +98,15 @@ const appNavData = {
   ],
 };
 
-export function AppSidebar({ isAdmin = false, ...props }: React.ComponentProps<typeof Sidebar> & { isAdmin?: boolean }) {
+export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
+  const router = useRouter();
   const pathname = usePathname();
   const [activePath, setActivePath] = React.useState(pathname || "");
   const [isSigningOut, setIsSigningOut] = React.useState(false);
   
   React.useEffect(() => {
     setActivePath(pathname || "");
+    console.log("Current pathname:", pathname); // Debug current path
   }, [pathname]);
 
   async function handleSignOut() {
@@ -112,7 +114,7 @@ export function AppSidebar({ isAdmin = false, ...props }: React.ComponentProps<t
       setIsSigningOut(true);
       const supabase = createClientComponentClient();
       await supabase.auth.signOut();
-      // Redirect will be handled by auth middleware
+      router.push("/login"); // Explicitly redirect to login
     } catch (error) {
       console.error("Error signing out:", error);
     } finally {
@@ -120,15 +122,20 @@ export function AppSidebar({ isAdmin = false, ...props }: React.ComponentProps<t
     }
   }
 
+  // Debug function to check if sidebar is rendering
+  React.useEffect(() => {
+    console.log("AdminSidebar rendered");
+  }, []);
+
   return (
-    <Sidebar {...props}>
+    <Sidebar {...props} className="border-r border-border">
       <SidebarHeader>
-        <TeamSwitcher teams={appNavData.teams} isAdmin={isAdmin} />
+        <TeamSwitcher teams={adminNavData.teams} />
         <hr className="border-t border-border mx-2 -mt-px" />
         <SearchForm className="mt-3" />
       </SidebarHeader>
       <SidebarContent>
-        {appNavData.navMain.map((group) => (
+        {adminNavData.navMain.map((group) => (
           <SidebarGroup key={group.title}>
             <SidebarGroupLabel className="uppercase text-muted-foreground/60">
               {group.title}
@@ -136,6 +143,7 @@ export function AppSidebar({ isAdmin = false, ...props }: React.ComponentProps<t
             <SidebarGroupContent className="px-2">
               <SidebarMenu>
                 {group.items.map((item) => {
+                  // Check if the current path exactly matches the item URL or starts with it
                   const isActive = activePath === item.url || 
                     (item.url !== "/" && activePath.startsWith(item.url));
                   
@@ -146,7 +154,7 @@ export function AppSidebar({ isAdmin = false, ...props }: React.ComponentProps<t
                         className="group/menu-button font-medium gap-3 h-9 rounded-md bg-gradient-to-r hover:bg-transparent hover:from-sidebar-accent hover:to-sidebar-accent/40 data-[active=true]:from-primary/20 data-[active=true]:to-primary/5 [&>svg]:size-auto"
                         isActive={isActive}
                       >
-                        <Link href={item.url}>
+                        <Link href={item.url} prefetch={true}>
                           {item.icon && (
                             <item.icon
                               className="text-muted-foreground/60 group-data-[active=true]/menu-button:text-primary"

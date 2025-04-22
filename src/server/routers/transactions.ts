@@ -212,6 +212,54 @@ export const transactionsRouter = router({
       }))
     }),
   
+  // Create transaction
+  createTransaction: protectedProcedure
+    .input(transactionSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { supabase, user } = ctx
+      
+      // Calculate commission amount if not provided
+      const commissionAmount = input.commission_amount || 
+        (input.transaction_value * (input.commission_rate / 100))
+      
+      // Create transaction record
+      const { data, error } = await supabase
+        .from('property_transactions')
+        .insert({
+          ...input,
+          commission_amount: commissionAmount,
+          status: 'Pending',
+          created_by: user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+      
+      if (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error.message,
+        })
+      }
+      
+      // Create audit log entry
+      await supabase
+        .from('audit_logs')
+        .insert({
+          entity_type: 'transactions',
+          entity_id: data.id,
+          action: 'Transaction created',
+          user_id: user.id,
+          created_at: new Date().toISOString()
+        })
+      
+      // Upload any associated documents if needed
+      // This would be handled separately or through a different endpoint
+      
+      return data
+    }),
+  
   // Approve transaction
   approveTransaction: adminProcedure
     .input(z.object({
@@ -369,4 +417,142 @@ export const transactionsRouter = router({
       
       return { success: true }
     }),
+
+  // Get commission forecast
+  getCommissionForecast: protectedProcedure
+    .input(z.object({
+      months: z.number().int().positive().default(12),
+      includeHistorical: z.boolean().default(true)
+    }))
+    .query(async ({ ctx, input }) => {
+      const { supabase } = ctx
+      const { months, includeHistorical } = input
+      
+      // Get historical data (past 12 months)
+      const historicalData = includeHistorical ? await getHistoricalCommissionData(supabase) : []
+      
+      // Get forecast data (next X months)
+      const forecastData = await getForecastCommissionData(supabase, months)
+      
+      // Calculate summary statistics
+      const totalHistoricalCommission = historicalData.reduce((sum, month) => sum + month.commissionAmount, 0)
+      const avgMonthlyCommission = historicalData.length > 0 
+        ? totalHistoricalCommission / historicalData.length 
+        : 0
+      
+      return {
+        historical: historicalData,
+        forecast: forecastData,
+        summary: {
+          totalHistoricalCommission,
+          avgMonthlyCommission,
+          forecastTotal: forecastData.reduce((sum, month) => sum + month.projectedCommissionAmount, 0)
+        }
+      }
+    }),
 })
+
+// Helper functions for commission forecast
+async function getHistoricalCommissionData(supabase: any) {
+  // Get the date 12 months ago
+  const oneYearAgo = new Date()
+  oneYearAgo.setMonth(oneYearAgo.getMonth() - 12)
+  
+  const { data, error } = await supabase
+    .from('property_transactions')
+    .select('transaction_date, commission_amount')
+    .gte('transaction_date', oneYearAgo.toISOString())
+    .lte('transaction_date', new Date().toISOString())
+    .order('transaction_date', { ascending: true })
+  
+  if (error) {
+    console.error('Error fetching historical commission data:', error)
+    return []
+  }
+  
+  // Group by month and sum commissions
+  const monthlyData: Record<string, number> = {}
+  
+  data.forEach((transaction: any) => {
+    const date = new Date(transaction.transaction_date)
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    
+    if (!monthlyData[monthKey]) {
+      monthlyData[monthKey] = 0
+    }
+    
+    monthlyData[monthKey] += transaction.commission_amount || 0
+  })
+  
+  // Convert to array format
+  return Object.entries(monthlyData).map(([monthKey, commissionAmount]) => {
+    const [year, month] = monthKey.split('-')
+    const date = new Date(parseInt(year), parseInt(month) - 1, 1)
+    
+    return {
+      date: date.toISOString(),
+      commissionAmount
+    }
+  })
+}
+
+async function getForecastCommissionData(supabase: any, months: number) {
+  // Get active transactions for projection basis
+  const { data: activeTransactions, error } = await supabase
+    .from('property_transactions')
+    .select('transaction_value, commission_rate, commission_amount')
+    .eq('status', 'Active')
+  
+  if (error) {
+    console.error('Error fetching active transactions:', error)
+    return []
+  }
+  
+  // Calculate average commission per transaction
+  const totalCommission = activeTransactions.reduce(
+    (sum: number, tx: any) => sum + (tx.commission_amount || 0), 
+    0
+  )
+  
+  const avgCommissionPerTransaction = activeTransactions.length > 0 
+    ? totalCommission / activeTransactions.length 
+    : 0
+  
+  // Get transaction count for the last 3 months to estimate monthly volume
+  const threeMonthsAgo = new Date()
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
+  
+  const { data: recentTransactions, error: countError } = await supabase
+    .from('property_transactions')
+    .select('id')
+    .gte('transaction_date', threeMonthsAgo.toISOString())
+  
+  if (countError) {
+    console.error('Error fetching transaction count:', countError)
+    return []
+  }
+  
+  // Estimate monthly transaction volume
+  const estimatedMonthlyTransactions = recentTransactions.length / 3
+  
+  // Generate forecast for next X months
+  const forecast = []
+  const currentDate = new Date()
+  
+  for (let i = 1; i <= months; i++) {
+    const forecastDate = new Date()
+    forecastDate.setMonth(currentDate.getMonth() + i)
+    
+    // Apply some randomness to make the forecast more realistic
+    const randomFactor = 0.8 + Math.random() * 0.4 // Random between 0.8 and 1.2
+    
+    const projectedCommissionAmount = estimatedMonthlyTransactions * avgCommissionPerTransaction * randomFactor
+    
+    forecast.push({
+      date: forecastDate.toISOString(),
+      projectedCommissionAmount
+    })
+  }
+  
+  return forecast
+}

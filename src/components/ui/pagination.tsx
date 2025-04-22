@@ -4,6 +4,7 @@ import {
   MoreHorizontalIcon,
 } from "lucide-react";
 import * as React from "react";
+import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -40,29 +41,56 @@ function PaginationItem({ ...props }: React.ComponentProps<"li">) {
 type PaginationLinkProps = {
   isActive?: boolean;
   isDisabled?: boolean;
-} & Pick<React.ComponentProps<typeof Button>, "size"> &
-  React.ComponentProps<"a">;
+  href?: string;
+  size?: "default" | "sm" | "lg" | "icon";
+  className?: string;
+  children?: React.ReactNode;
+  onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
+};
 
 function PaginationLink({
   className,
   isActive,
+  isDisabled,
   size = "icon",
+  href,
+  children,
   ...props
 }: PaginationLinkProps) {
+  if (href) {
+    return (
+      <Link
+        href={href}
+        aria-current={isActive ? "page" : undefined}
+        data-slot="pagination-link"
+        data-active={isActive}
+        className={cn(
+          buttonVariants({
+            variant: isActive ? "outline" : "ghost",
+            size,
+          }),
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </Link>
+    );
+  }
+
   return (
-    <a
+    <Button
       aria-current={isActive ? "page" : undefined}
       data-slot="pagination-link"
       data-active={isActive}
-      className={cn(
-        buttonVariants({
-          variant: isActive ? "outline" : "ghost",
-          size,
-        }),
-        className,
-      )}
+      disabled={isDisabled}
+      variant={isActive ? "outline" : "ghost"}
+      size={size}
+      className={className}
       {...props}
-    />
+    >
+      {children}
+    </Button>
   );
 }
 

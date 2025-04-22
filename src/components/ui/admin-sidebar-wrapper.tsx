@@ -1,10 +1,15 @@
 "use client";
 
-import { useIsAdmin } from "@/hooks/useIsAdmin";
-import { AppSidebar } from "./app-sidebar";
+import { AdminSidebar } from "@/components/ui/admin-sidebar";
+import { useEffect } from "react";
 
 export function AdminSidebarWrapper() {
-    const isAdmin = useIsAdmin();
-    
-    return <AppSidebar isAdmin={isAdmin} />;
-  }
+  // Add debugging to check if wrapper is rendering properly
+  useEffect(() => {
+    console.log("AdminSidebarWrapper rendered");
+  }, []);
+
+  return (
+    <AdminSidebar className="border-r border-border" />
+  );
+}

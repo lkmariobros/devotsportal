@@ -1,3 +1,5 @@
+"use client";
+
 import { AdminSidebarWrapper } from "@/components/ui/admin-sidebar-wrapper";
 import { Toaster } from "@/components/ui/sonner";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
@@ -13,12 +15,18 @@ import { Separator } from "@/components/ui/separator";
 import UserDropdown from "@/components/ui/user-dropdown";
 import FeedbackDialog from "@/components/ui/feedback-dialog";
 import { RiScanLine } from "@remixicon/react";
+import { useEffect } from "react";
 
 export default function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Add debugging to check if layout is rendering properly
+  useEffect(() => {
+    console.log("AdminLayout rendered");
+  }, []);
+
   return (
     <SidebarProvider>
       <div className="grid min-h-screen w-full grid-cols-[auto_1fr]">
@@ -34,7 +42,7 @@ export default function AdminLayout({
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="/admin-dashboard">
+                    <BreadcrumbLink href="/admin/dashboard">
                       <RiScanLine size={22} aria-hidden="true" />
                       <span className="sr-only">Admin Dashboard</span>
                     </BreadcrumbLink>
