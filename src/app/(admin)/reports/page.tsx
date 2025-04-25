@@ -8,4 +8,4 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import DatePicker from "@/components/reusable-ui/date-picker"
 import { DateRange } from "react-day-picker"
 import { RiDownloadLine, RiFileChartLine } from "@remixicon/react"
-import { BarChart, Bar,
+import { BarChart, Bar } from "recharts"

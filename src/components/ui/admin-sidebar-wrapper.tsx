@@ -1,15 +1,13 @@
 "use client";
 
 import { AdminSidebar } from "@/components/ui/admin-sidebar";
-import { useEffect } from "react";
+import { SidebarProvider } from "@/components/reusable-ui/sidebar";
+import * as React from "react";
 
-export function AdminSidebarWrapper() {
-  // Add debugging to check if wrapper is rendering properly
-  useEffect(() => {
-    console.log("AdminSidebarWrapper rendered");
-  }, []);
-
+export function AdminSidebarWrapper(props: React.ComponentProps<typeof AdminSidebar>) {
   return (
-    <AdminSidebar className="border-r border-border" />
+    <SidebarProvider defaultOpen={true}>
+      <AdminSidebar {...props} />
+    </SidebarProvider>
   );
 }

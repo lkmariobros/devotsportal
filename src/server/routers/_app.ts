@@ -6,12 +6,18 @@ import { usersRouter } from './user'
 import { documentsRouter } from './documents'
 import { notificationsRouter } from './notifications'
 import { createTRPCContext } from '../trpc'
+import { analyticsRouter } from './analytics'
+import { adminRouter } from './admin'
+import { commissionsRouter } from './commissions'
 
 export const appRouter = router({
   transactions: transactionsRouter,
   users: usersRouter,
   documents: documentsRouter,
   notifications: notificationsRouter,
+  analytics: analyticsRouter,
+  admin: adminRouter,
+  commissions: commissionsRouter,
   
   // Get all commissions
   getAllCommissions: adminProcedure

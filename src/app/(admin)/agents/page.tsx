@@ -43,7 +43,13 @@ export default function AgentsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 10
 
-  const { data: agentsData, isLoading } = trpc.users.getAgents.useQuery()
+  const { data: agentsData, isLoading: isAgentsLoading } = trpc.users.getAgents.useQuery({
+    search: "",
+    status: "",
+    teamId: undefined,
+    limit: 10,
+    offset: 0
+  })
   
   // Filter agents based on search query
   const filteredAgents = agentsData?.agents.filter((agent: Agent) => 
@@ -116,7 +122,7 @@ export default function AgentsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isLoading ? (
+                  {isAgentsLoading ? (
                     Array(5).fill(0).map((_, i) => (
                       <TableRow key={i}>
                         <TableCell><Skeleton className="h-6 w-[150px]" /></TableCell>

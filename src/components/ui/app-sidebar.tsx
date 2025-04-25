@@ -102,6 +102,8 @@ export function AppSidebar({ isAdmin = false, ...props }: React.ComponentProps<t
   const pathname = usePathname();
   const [activePath, setActivePath] = React.useState(pathname || "");
   const [isSigningOut, setIsSigningOut] = React.useState(false);
+
+  const isInAdminSection = pathname.includes('/admin') || pathname.startsWith('/admin-dashboard');
   
   React.useEffect(() => {
     setActivePath(pathname || "");
@@ -123,7 +125,7 @@ export function AppSidebar({ isAdmin = false, ...props }: React.ComponentProps<t
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={appNavData.teams} isAdmin={isAdmin} />
+        <TeamSwitcher teams={appNavData.teams} isAdmin={isAdmin || isInAdminSection} />
         <hr className="border-t border-border mx-2 -mt-px" />
         <SearchForm className="mt-3" />
       </SidebarHeader>

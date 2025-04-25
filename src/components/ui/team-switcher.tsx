@@ -35,7 +35,7 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
   const pathname = usePathname();
   
   // Determine if we're currently in the admin dashboard
-  const isInAdminDashboard = pathname.includes("/admin-dashboard");
+  const isInAdminDashboard = pathname.includes("/admin-dashboard") || pathname.includes("/admin");
 
   // Store toast ID in a ref to ensure it persists across renders
   const toastIdRef = React.useRef<string | number | null>(null);

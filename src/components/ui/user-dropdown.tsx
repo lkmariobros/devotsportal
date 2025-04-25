@@ -34,7 +34,7 @@ export default function UserDropdown() {
             Keith Kennedy
           </span>
           <span className="truncate text-xs font-normal text-muted-foreground">
-            k.kennedy@originui.com
+            k.kennedy@devots.com
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

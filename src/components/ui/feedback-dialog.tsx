@@ -25,13 +25,13 @@ export default function FeedbackDialog() {
             <a className="text-foreground hover:underline" href="#">
               tutorials
             </a>
-            , read Origin UI&lsquo;s{" "}
+            , read {" "}
             <a className="text-foreground hover:underline" href="#">
               documentation
             </a>
             , or join our{" "}
             <a className="text-foreground hover:underline" href="#">
-              Discord
+              Telegram
             </a>{" "}
             for community help.
           </DialogDescription>
@@ -39,7 +39,7 @@ export default function FeedbackDialog() {
         <form className="space-y-5">
           <Textarea
             id="feedback"
-            placeholder="How can we improve Origin UI?"
+            placeholder="How can we improve?"
             aria-label="Send feedback"
           />
           <div className="flex flex-col sm:flex-row sm:justify-end">

@@ -14,6 +14,7 @@ import {
 import { DateField, DateInput } from "@/components/ui/datefield-rac"
 import { trpc } from "@/utils/trpc/client"
 import { RiSearchLine, RiFilterLine, RiCloseLine } from "@remixicon/react"
+import { createClient } from "@supabase/supabase-js"
 
 // Define agent type to fix the implicit any error
 interface Agent {
@@ -34,7 +35,13 @@ export function TransactionsFilters() {
   const [search, setSearch] = useState(searchParams.get("search") || "")
   
   // Get agents for dropdown
-  const { data: agentsData } = trpc.users.getAgents.useQuery()
+  const { data: agentsData } = trpc.users.getAgents.useQuery({
+    search: "",
+    status: "",
+    teamId: undefined,
+    limit: 100,
+    offset: 0
+  })
   const agents = agentsData?.agents || []
   
   // Apply filters
@@ -113,7 +120,7 @@ export function TransactionsFilters() {
               <DateInput 
                 placeholder="Start Date"
                 value={startDate ? new Date(startDate) : undefined}
-                onChange={(date: Date | undefined) => setStartDate(date ? date.toISOString().split('T')[0] : "")}
+                onChange={(date) => setStartDate(date ? date.toISOString().split('T')[0] : "")}
               />
             </DateField>
           </div>
@@ -123,7 +130,7 @@ export function TransactionsFilters() {
               <DateInput 
                 placeholder="End Date"
                 value={endDate ? new Date(endDate) : undefined}
-                onChange={(date: Date | undefined) => setEndDate(date ? date.toISOString().split('T')[0] : "")}
+                onChange={(date) => setEndDate(date ? date.toISOString().split('T')[0] : "")}
               />
             </DateField>
           </div>
@@ -141,4 +148,26 @@ export function TransactionsFilters() {
       </div>
     </div>
   )
+  const utils = trpc.useContext()
+
+  useEffect(() => {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    const channel = supabase
+      .channel('public:transactions')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'transactions' },
+        () => {
+          // Invalidate or refetch your transaction list query here
+          utils.transactions.getAllTransactions.invalidate()
+        }
+      )
+      .subscribe()
+    return () => {
+      channel.unsubscribe()
+    }
+  }, [utils])
 }

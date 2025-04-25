@@ -15,8 +15,12 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarRail,
-} from "@/components/ui/sidebar";
+  SidebarProvider,
+} from "@/components/reusable-ui/sidebar";
 import {
   RiScanLine,
   RiBardLine,
@@ -27,11 +31,12 @@ import {
   RiSettings3Line,
   RiLeafLine,
   RiLogoutBoxLine,
+  RiArrowDownSLine,
 } from "@remixicon/react";
 import { useRouter, usePathname } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
-// Admin navigation data
+// Admin navigation data with updated structure
 const adminNavData = {
   teams: [
     {
@@ -54,30 +59,21 @@ const adminNavData = {
           icon: RiBardLine,
         },
         {
-          title: "Agents",
-          url: "/agents",
+          title: "Agent Management",
           icon: RiUserFollowLine,
-        },
-        {
-          title: "Tools",
-          url: "/admin/tools",
-          icon: RiCodeSSlashLine,
-        },
-        {
-          title: "Integration",
-          url: "/admin/integration",
-          icon: RiLoginCircleLine,
-        },
-        {
-          title: "Layouts",
-          url: "/admin/layouts",
-          icon: RiLayoutLeftLine,
-        },
-        {
-          title: "Reports",
-          url: "/admin/reports",
-          icon: RiLeafLine,
-        },
+          hasSubItems: true,
+          subItems: [
+            {
+              title: "Agents",
+              url: "/agents",
+            },
+            {
+              title: "Teams",
+              url: "/teams",
+            }
+          ]
+        }
+        // The items have been completely removed, not just commented out
       ],
     },
     {
@@ -98,16 +94,43 @@ const adminNavData = {
   ],
 };
 
+// Export the AdminSidebar component so it can be imported elsewhere
 export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
   const pathname = usePathname();
   const [activePath, setActivePath] = React.useState(pathname || "");
   const [isSigningOut, setIsSigningOut] = React.useState(false);
+  const [expandedMenus, setExpandedMenus] = React.useState<Record<string, boolean>>({});
   
   React.useEffect(() => {
     setActivePath(pathname || "");
-    console.log("Current pathname:", pathname); // Debug current path
+    
+    // Auto-expand menus based on current path
+    const newExpandedState = {...expandedMenus};
+    
+    // Check if we should expand the Agent Management section
+    adminNavData.navMain.forEach(group => {
+      group.items.forEach(item => {
+        if (item.hasSubItems && item.subItems) {
+          const shouldExpand = item.subItems.some(subItem => 
+            pathname === subItem.url || pathname.startsWith(subItem.url)
+          );
+          if (shouldExpand) {
+            newExpandedState[item.title] = true;
+          }
+        }
+      });
+    });
+    
+    setExpandedMenus(newExpandedState);
   }, [pathname]);
+
+  const toggleSubmenu = (menuTitle: string) => {
+    setExpandedMenus(prev => ({
+      ...prev,
+      [menuTitle]: !prev[menuTitle]
+    }));
+  };
 
   async function handleSignOut() {
     try {
@@ -122,15 +145,10 @@ export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
     }
   }
 
-  // Debug function to check if sidebar is rendering
-  React.useEffect(() => {
-    console.log("AdminSidebar rendered");
-  }, []);
-
   return (
     <Sidebar {...props} className="border-r border-border">
       <SidebarHeader>
-        <TeamSwitcher teams={adminNavData.teams} />
+        <TeamSwitcher teams={adminNavData.teams} isAdmin={true} />
         <hr className="border-t border-border mx-2 -mt-px" />
         <SearchForm className="mt-3" />
       </SidebarHeader>
@@ -143,10 +161,66 @@ export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupContent className="px-2">
               <SidebarMenu>
                 {group.items.map((item) => {
-                  // Check if the current path exactly matches the item URL or starts with it
-                  const isActive = activePath === item.url || 
-                    (item.url !== "/" && activePath.startsWith(item.url));
+                  // For items with subitems (like Agent Management)
+                  if (item.hasSubItems && item.subItems) {
+                    const isExpanded = expandedMenus[item.title] || false;
+                    const hasActiveSubItem = item.subItems.some(subItem => 
+                      activePath === subItem.url || 
+                      (subItem.url !== "/" && activePath.startsWith(subItem.url))
+                    );
+                    
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton
+                          className="group/menu-button font-medium gap-3 h-9 rounded-md bg-gradient-to-r hover:bg-transparent hover:from-sidebar-accent hover:to-sidebar-accent/40 data-[active=true]:from-primary/20 data-[active=true]:to-primary/5 [&>svg]:size-auto"
+                          isActive={hasActiveSubItem}
+                          onClick={() => toggleSubmenu(item.title)}
+                        >
+                          {item.icon && (
+                            <item.icon
+                              className="text-muted-foreground/60 group-data-[active=true]/menu-button:text-primary"
+                              size={22}
+                              aria-hidden="true"
+                            />
+                          )}
+                          <span>{item.title}</span>
+                          <RiArrowDownSLine 
+                            className={`ml-auto transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
+                            size={18} 
+                          />
+                        </SidebarMenuButton>
+                        
+                        {isExpanded && (
+                          <SidebarMenuSub>
+                            {item.subItems.map(subItem => {
+                              const isSubItemActive = activePath === subItem.url || 
+                                (subItem.url !== "/" && activePath.startsWith(subItem.url));
+                              
+                              return (
+                                <SidebarMenuSubItem key={subItem.title}>
+                                  <SidebarMenuSubButton
+                                    asChild
+                                    isActive={isSubItemActive}
+                                  >
+                                    <Link href={subItem.url} prefetch={true}>
+                                      {subItem.title}
+                                    </Link>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              );
+                            })}
+                          </SidebarMenuSub>
+                        )}
+                      </SidebarMenuItem>
+                    );
+                  }
                   
+                  // For regular items without subitems
+                  const isActive = item.url ? (
+                    activePath === item.url || 
+                    (item.url !== "/" && activePath.startsWith(item.url))
+                  ) : false;
+
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
@@ -154,7 +228,7 @@ export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
                         className="group/menu-button font-medium gap-3 h-9 rounded-md bg-gradient-to-r hover:bg-transparent hover:from-sidebar-accent hover:to-sidebar-accent/40 data-[active=true]:from-primary/20 data-[active=true]:to-primary/5 [&>svg]:size-auto"
                         isActive={isActive}
                       >
-                        <Link href={item.url} prefetch={true}>
+                        <Link href={item.url || "#"} prefetch={true}>
                           {item.icon && (
                             <item.icon
                               className="text-muted-foreground/60 group-data-[active=true]/menu-button:text-primary"
@@ -196,3 +270,14 @@ export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
     </Sidebar>
   );
 }
+
+// Export a wrapped version that includes the SidebarProvider
+export function AdminSidebarWrapper(props: React.ComponentProps<typeof Sidebar>) {
+  return (
+    <SidebarProvider defaultOpen={true}>
+      <AdminSidebar {...props} />
+    </SidebarProvider>
+  );
+}
+
+
