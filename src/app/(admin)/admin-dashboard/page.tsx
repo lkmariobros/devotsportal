@@ -22,6 +22,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { TransactionsChart } from "./transactions-chart";
 import { CommissionForecastChart } from "./commission-forecast-chart";
 import { AgentActivity } from "./agent-activity";
+import { DashboardTransactionData } from "@/types/transactions";
 
 // Define proper types for your API responses
 interface AgentData {
@@ -38,28 +39,6 @@ interface AgentData {
   }[];
   totalCount: number;
   agentChange?: number | null; // Make it optional and allow null
-}
-
-interface TransactionData {
-  statusCounts: { status: string; count: number }[];
-  recentTransactions: {
-    id: string;
-    transaction_date: string;
-    transaction_value: number;
-    status: string;
-    transaction_types: { name: string }[];
-    profiles: { first_name: string; last_name: string }[];
-  }[];
-  upcomingPayments: Array<{
-    agent_name: string;
-    payment_date: string;
-    amount: number;
-  }>;
-  transactionCounts: { active: number; completed: number };
-  revenue: number;
-  avgCommission: number;
-  revenueChange?: number;
-  commissionChange?: number;
 }
 
 interface CommissionForecastProps {
@@ -95,7 +74,7 @@ function StatsGridSkeleton() {
 
 // Upcoming Payments component
 function UpcomingPayments({ data, isLoading }: { 
-  data?: TransactionData; 
+  data?: DashboardTransactionData; 
   isLoading: boolean 
 }) {
   if (isLoading) {
@@ -114,7 +93,7 @@ function UpcomingPayments({ data, isLoading }: {
 
   return (
     <div className="space-y-3">
-      {data.upcomingPayments.slice(0, 3).map((payment, index) => (
+      {data.upcomingPayments.slice(0, 3).map((payment, index: number) => (
         <div key={index} className="flex items-center justify-between border-b pb-2">
           <div>
             <div className="font-medium">{payment.agent_name || "Agent"}</div>
@@ -169,12 +148,12 @@ function DashboardStats({
   dashboardData 
 }: { 
   agentsData?: AgentData; 
-  dashboardData?: TransactionData 
+  dashboardData?: DashboardTransactionData 
 }) {
   // Calculate pending commissions
   const pendingCommissions = useMemo(() => {
     return dashboardData?.upcomingPayments?.reduce(
-      (total, payment) => total + (payment?.amount || 0),
+      (total: number, payment: { amount: number }) => total + (payment?.amount || 0),
       0
     ) || 0;
   }, [dashboardData?.upcomingPayments]);
@@ -271,7 +250,7 @@ export default function AdminDashboardPage() {
   // Calculate pending commissions total - moved to the DashboardStats component
   const pendingCommissions = useMemo(() => {
     return dashboardData?.upcomingPayments?.reduce(
-      (total, payment) => total + (payment?.amount || 0),
+      (total: number, payment: { amount: number }) => total + (payment?.amount || 0),
       0
     ) || 0;
   }, [dashboardData?.upcomingPayments]);
@@ -280,7 +259,7 @@ export default function AdminDashboardPage() {
   function handleExportData(type: 'summary' | 'commissions' | 'all' = 'all') {
     if (!dashboardData && !commissionForecast) return
     
-    let exportData: Record<string, any> = {}
+    const exportData: Record<string, any> = {}
     let filename = `dashboard-export-${new Date().toISOString().split('T')[0]}`
     
     if (type === 'all' || type === 'summary') {

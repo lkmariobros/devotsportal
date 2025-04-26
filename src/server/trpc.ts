@@ -1,5 +1,5 @@
 import { initTRPC, TRPCError } from '@trpc/server'
-import { createServerSupabaseClient } from '@/utils/supabase/server'
+import { createServerSupabaseClient, isUserAdmin } from '@/utils/supabase/server'
 import superjson from 'superjson'
 import { auditLogs } from '@/db/schema'
 
@@ -92,5 +92,23 @@ const withAudit = t.middleware(async ({ ctx, next, path, getRawInput }) => {
 export const router = t.router
 export const publicProcedure = t.procedure
 export const protectedProcedure = t.procedure.use(isAuthed)
-export const adminProcedure = t.procedure.use(isAdmin)
+export const adminProcedure = t.procedure
+  .use(isAuthed)
+  .use(async ({ ctx, next }) => {
+    const isAdmin = await isUserAdmin();
+    
+    if (!isAdmin) {
+      throw new TRPCError({ 
+        code: 'FORBIDDEN',
+        message: 'You must be an admin to perform this action'
+      });
+    }
+    
+    return next({
+      ctx: {
+        ...ctx,
+        isAdmin: true
+      }
+    });
+  });
 export const adminProcedureWithAudit = t.procedure.use(isAdmin).use(withAudit)
