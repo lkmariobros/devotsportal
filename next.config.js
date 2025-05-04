@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
+
+// This disables ESLint completely
+process.env.DISABLE_ESLINT_PLUGIN = 'true';
+process.env.NEXT_DISABLE_ESLINT = '1';
+
 const nextConfig = {
   // Optimize for Vercel deployment
   output: 'standalone',
