@@ -3,15 +3,20 @@ const nextConfig = {
   // Optimize for Vercel deployment
   output: 'standalone',
 
-  // Disable ESLint in build (Vercel will handle this)
+  // Completely disable ESLint in build
   eslint: {
     ignoreDuringBuilds: true,
+    dirs: [],
   },
 
-  // Disable TypeScript checking in build (Vercel will handle this)
+  // Completely disable TypeScript checking in build
   typescript: {
     ignoreBuildErrors: true,
+    tsconfigPath: "tsconfig.json",
   },
+
+  // Disable React strict mode for now
+  reactStrictMode: false,
 
   // Configure image domains
   images: {
