@@ -33,7 +33,7 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
   const [isNavigating, setIsNavigating] = React.useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  
+
   // Determine if we're currently in the admin dashboard
   const isInAdminDashboard = pathname.includes("/admin-dashboard") || pathname.includes("/admin");
 
@@ -81,33 +81,33 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
   const handleAdminSwitch = () => {
     // Prevent multiple navigations
     if (isNavigating) return;
-    
+
     setIsNavigating(true);
-    
+
     // Dismiss any existing toasts first
     toast.dismiss();
-    
+
     // Create a loading toast with an ID
     toastIdRef.current = toast.loading("Switching to Dashboard...", {
       duration: 3000,
     });
-    
+
     // Short timeout to show the loading toast before redirecting
     setTimeout(() => {
       // Dismiss the loading toast
       if (toastIdRef.current) {
         toast.dismiss(toastIdRef.current);
       }
-      
+
       // Show success toast
       toast.success("Welcome to Admin Dashboard", {
         description: "You now have access to admin features",
         id: "admin-success-toast", // Use a unique ID to prevent duplicates
       });
-      
+
       // Navigate to admin dashboard
       router.push("/admin-dashboard");
-      
+
       // Reset navigation state after a delay
       setTimeout(() => {
         setIsNavigating(false);
@@ -118,33 +118,33 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
   const handleAgentPortalSwitch = () => {
     // Prevent multiple navigations
     if (isNavigating) return;
-    
+
     setIsNavigating(true);
-    
+
     // Dismiss any existing toasts first
     toast.dismiss();
-    
+
     // Create a loading toast with an ID
     toastIdRef.current = toast.loading("Switching to Agent Portal...", {
       duration: 3000,
     });
-    
+
     // Short timeout to show the loading toast before redirecting
     setTimeout(() => {
       // Dismiss the loading toast
       if (toastIdRef.current) {
         toast.dismiss(toastIdRef.current);
       }
-      
+
       // Show success toast
       toast.success("Welcome to Agent Portal", {
         description: "You're now in the agent view",
         id: "agent-success-toast", // Use a unique ID to prevent duplicates
       });
-      
+
       // Navigate to agent portal
-      router.push("/dashboard");
-      
+      router.push("/agent/dashboard");
+
       // Reset navigation state after a delay
       setTimeout(() => {
         setIsNavigating(false);
@@ -193,7 +193,7 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
             <DropdownMenuLabel className="uppercase text-muted-foreground/60 text-xs">
               Portal Options
             </DropdownMenuLabel>
-            
+
             {isInAdminDashboard ? (
               // If in admin dashboard, show option to go to agent portal
               <DropdownMenuItem

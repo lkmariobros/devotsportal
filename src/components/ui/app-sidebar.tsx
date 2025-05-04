@@ -29,7 +29,7 @@ import {
   RiLogoutBoxLine,
 } from "@remixicon/react";
 import { usePathname } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClientSupabaseClient } from "@/utils/supabase/client";
 
 // App navigation data
 const appNavData = {
@@ -104,7 +104,7 @@ export function AppSidebar({ isAdmin = false, ...props }: React.ComponentProps<t
   const [isSigningOut, setIsSigningOut] = React.useState(false);
 
   const isInAdminSection = pathname.includes('/admin') || pathname.startsWith('/admin-dashboard');
-  
+
   React.useEffect(() => {
     setActivePath(pathname || "");
   }, [pathname]);
@@ -112,11 +112,15 @@ export function AppSidebar({ isAdmin = false, ...props }: React.ComponentProps<t
   async function handleSignOut() {
     try {
       setIsSigningOut(true);
-      const supabase = createClientComponentClient();
+      const supabase = createClientSupabaseClient();
       await supabase.auth.signOut();
       // Redirect will be handled by auth middleware
     } catch (error) {
       console.error("Error signing out:", error);
+      // Fallback for development mode
+      if (process.env.NODE_ENV === 'development') {
+        window.location.href = '/';
+      }
     } finally {
       setIsSigningOut(false);
     }
@@ -138,9 +142,9 @@ export function AppSidebar({ isAdmin = false, ...props }: React.ComponentProps<t
             <SidebarGroupContent className="px-2">
               <SidebarMenu>
                 {group.items.map((item) => {
-                  const isActive = activePath === item.url || 
+                  const isActive = activePath === item.url ||
                     (item.url !== "/" && activePath.startsWith(item.url));
-                  
+
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
@@ -171,7 +175,7 @@ export function AppSidebar({ isAdmin = false, ...props }: React.ComponentProps<t
         <hr className="border-t border-border mx-2 -mt-px" />
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton 
+            <SidebarMenuButton
               className="font-medium gap-3 h-9 rounded-md bg-gradient-to-r hover:bg-transparent hover:from-sidebar-accent hover:to-sidebar-accent/40 data-[active=true]:from-primary/20 data-[active=true]:to-primary/5 [&>svg]:size-auto"
               onClick={handleSignOut}
               disabled={isSigningOut}

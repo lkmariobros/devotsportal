@@ -15,6 +15,7 @@ import { ChevronDown, Filter, MoreHorizontal, Search } from "lucide-react"
 import { trpc } from "@/utils/trpc/client"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { TransactionDetails } from "@/components/transactions/transaction-details"
+import { toast } from "sonner"
 
 interface Transaction {
   id: string
@@ -32,27 +33,27 @@ interface Transaction {
 export default function TransactionsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  
+
   // Pagination state
   const page = Number(searchParams.get("page") || "1")
   const limit = Number(searchParams.get("limit") || "10")
-  
+
   // Filter state
   const [filters, setFilters] = useState({
     status: searchParams.get("status") || "",
     search: searchParams.get("search") || "",
     dateRange: searchParams.get("dateRange") || "all"
   })
-  
+
   // Selected transactions for batch operations
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([])
   const [expandedTransaction, setExpandedTransaction] = useState<string | null>(null)
-  
+
   // Helper function to convert dateRange to startDate/endDate
   function getDateRangeValues(dateRange: string) {
     const today = new Date()
     const startOfDay = new Date(today.setHours(0, 0, 0, 0))
-    
+
     switch (dateRange) {
       case 'today':
         return { startDate: startOfDay.toISOString() }
@@ -69,7 +70,7 @@ export default function TransactionsPage() {
       case 'lastMonth': {
         const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
         const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0)
-        return { 
+        return {
           startDate: startOfLastMonth.toISOString(),
           endDate: endOfLastMonth.toISOString()
         }
@@ -82,7 +83,7 @@ export default function TransactionsPage() {
         return {}
     }
   }
-  
+
   // Query with proper parameters
   const { data, isLoading, refetch } = trpc.transactions.getAllTransactions.useQuery({
     offset: (page - 1) * limit,
@@ -91,41 +92,105 @@ export default function TransactionsPage() {
     search: filters.search || undefined,
     ...(filters.dateRange && filters.dateRange !== 'all' ? getDateRangeValues(filters.dateRange) : {})
   })
-  
-  // Fix the mutation calls to use the correct parameter structure
-  const batchApproveMutation = trpc.transactions.approveTransaction.useMutation({
-    onSuccess: () => {
+
+  // Use the new batch approval mutation
+  const batchApproveMutation = trpc.transactions.batchApproveTransactions.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Successfully approved ${data.success_count} transactions`)
+      if (data.failure_count > 0) {
+        toast.error(`Failed to approve ${data.failure_count} transactions`)
+      }
       setSelectedTransactions([])
+      refetch()
+    },
+    onError: (error) => {
+      toast.error(`Error in batch approval: ${error.message}`)
+    }
+  })
+
+  // Individual approval/rejection mutations for single transactions
+  const approveTransactionMutation = trpc.transactions.approveTransaction.useMutation({
+    onSuccess: () => {
       refetch()
     }
   })
-  
-  const batchRejectMutation = trpc.transactions.rejectTransaction.useMutation({
+
+  const rejectTransactionMutation = trpc.transactions.rejectTransaction.useMutation({
     onSuccess: () => {
-      setSelectedTransactions([])
       refetch()
     }
   })
-  
-  // Handle batch operations by processing each transaction sequentially
+
+  // Handle batch approval with improved error handling
   const handleBatchApprove = async () => {
     if (selectedTransactions.length === 0) return
-    
-    // Process each transaction sequentially
-    for (const id of selectedTransactions) {
-      await batchApproveMutation.mutateAsync({ id })
+
+    // Show confirmation dialog for large batches
+    if (selectedTransactions.length > 10) {
+      const confirmed = window.confirm(
+        `You are about to approve ${selectedTransactions.length} transactions. This operation cannot be undone. Continue?`
+      )
+      if (!confirmed) return
     }
+
+    // Use the batch approval endpoint
+    await batchApproveMutation.mutateAsync({
+      ids: selectedTransactions,
+      notes: 'Batch approved'
+    })
   }
-  
+
+  // For now, handle batch rejection sequentially
+  // In the future, we could implement a batch rejection endpoint
   const handleBatchReject = async () => {
     if (selectedTransactions.length === 0) return
-    
-    // Process each transaction sequentially
-    for (const id of selectedTransactions) {
-      await batchRejectMutation.mutateAsync({ id })
+
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      `You are about to reject ${selectedTransactions.length} transactions. This operation cannot be undone. Continue?`
+    )
+    if (!confirmed) return
+
+    // Track progress
+    let completed = 0
+    let failed = 0
+
+    // Process in chunks of 5 for better UX
+    const chunkSize = 5
+    for (let i = 0; i < selectedTransactions.length; i += chunkSize) {
+      const chunk = selectedTransactions.slice(i, i + chunkSize)
+
+      // Process chunk in parallel
+      const results = await Promise.allSettled(
+        chunk.map(id =>
+          rejectTransactionMutation.mutateAsync({ id, notes: 'Batch rejected' })
+        )
+      )
+
+      // Count successes and failures
+      results.forEach(result => {
+        if (result.status === 'fulfilled') {
+          completed++
+        } else {
+          failed++
+        }
+      })
+
+      // Update progress toast
+      toast.success(`Processed ${completed + failed} of ${selectedTransactions.length} transactions`)
     }
+
+    // Show final results
+    toast.success(`Successfully rejected ${completed} transactions`)
+    if (failed > 0) {
+      toast.error(`Failed to reject ${failed} transactions`)
+    }
+
+    // Clear selection and refresh
+    setSelectedTransactions([])
+    refetch()
   }
-  
+
   // Handle select all
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -134,7 +199,7 @@ export default function TransactionsPage() {
       setSelectedTransactions([])
     }
   }
-  
+
   // Handle individual selection
   const handleSelectTransaction = (id: string, checked: boolean) => {
     if (checked) {
@@ -143,17 +208,17 @@ export default function TransactionsPage() {
       setSelectedTransactions(prev => prev.filter(t => t !== id))
     }
   }
-  
+
   // Apply filters
   const applyFilters = () => {
     const params = new URLSearchParams()
     params.set("page", "1")
     params.set("limit", limit.toString())
-    
+
     if (filters.status) params.set("status", filters.status)
     if (filters.search) params.set("search", filters.search)
     if (filters.dateRange) params.set("dateRange", filters.dateRange)
-    
+
     router.push(`/admin/transactions?${params.toString()}`)
   }
 
@@ -172,17 +237,17 @@ export default function TransactionsPage() {
           <h1 className="text-3xl font-bold">Transaction Management</h1>
           <p className="text-muted-foreground">Manage and process property transactions</p>
         </div>
-        
+
         <div className="flex gap-2">
-          <Button 
-            variant="default" 
+          <Button
+            variant="default"
             onClick={handleBatchApprove}
             disabled={selectedTransactions.length === 0 || batchApproveMutation.isPending}
           >
             Approve Selected ({selectedTransactions.length})
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={handleBatchReject}
             disabled={selectedTransactions.length === 0 || batchRejectMutation.isPending}
           >
@@ -190,12 +255,12 @@ export default function TransactionsPage() {
           </Button>
         </div>
       </div>
-      
+
       <Card>
         <CardHeader className="pb-4">
           <CardTitle>Transactions</CardTitle>
           <CardDescription>View and manage all property transactions</CardDescription>
-          
+
           <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -208,7 +273,7 @@ export default function TransactionsPage() {
                 onKeyDown={e => e.key === 'Enter' && applyFilters()}
               />
             </div>
-            
+
             <div className="flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -222,8 +287,8 @@ export default function TransactionsPage() {
                   <div className="grid gap-4 p-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Status</label>
-                      <Select 
-                        value={filters.status} 
+                      <Select
+                        value={filters.status}
                         onValueChange={value => setFilters(prev => ({ ...prev, status: value }))}
                       >
                         <SelectTrigger>
@@ -238,11 +303,11 @@ export default function TransactionsPage() {
                         </SelectContent>
                       </Select>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Date Range</label>
-                      <Select 
-                        value={filters.dateRange} 
+                      <Select
+                        value={filters.dateRange}
                         onValueChange={value => setFilters(prev => ({ ...prev, dateRange: value }))}
                       >
                         <SelectTrigger>
@@ -258,7 +323,7 @@ export default function TransactionsPage() {
                         </SelectContent>
                       </Select>
                     </div>
-                    
+
                     <Button className="w-full" onClick={applyFilters}>
                       Apply Filters
                     </Button>
@@ -268,14 +333,14 @@ export default function TransactionsPage() {
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent>
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[50px]">
-                    <Checkbox 
+                    <Checkbox
                       checked={selectedTransactions.length > 0 && selectedTransactions.length === data?.transactions.length}
                       onCheckedChange={handleSelectAll}
                     />
@@ -307,13 +372,13 @@ export default function TransactionsPage() {
                     <>
                       <TableRow key={transaction.id} className="cursor-pointer hover:bg-muted/50">
                         <TableCell>
-                          <Checkbox 
+                          <Checkbox
                             checked={selectedTransactions.includes(transaction.id)}
                             onCheckedChange={checked => handleSelectTransaction(transaction.id, !!checked)}
                             onClick={e => e.stopPropagation()}
                           />
                         </TableCell>
-                        <TableCell 
+                        <TableCell
                           className="font-medium"
                           onClick={() => setExpandedTransaction(expandedTransaction === transaction.id ? null : transaction.id)}
                         >
@@ -375,28 +440,28 @@ export default function TransactionsPage() {
             </Table>
           </div>
         </CardContent>
-        
+
         <CardFooter className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
             Showing {data?.transactions.length || 0} of {data?.total || 0} transactions
           </div>
-          
+
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationLink 
+                <PaginationLink
                   href={`/admin/transactions?page=${Math.max(1, page - 1)}&limit=${limit}`}
                   isDisabled={page <= 1}
                 >
                   Previous
                 </PaginationLink>
               </PaginationItem>
-              
+
               {Array.from({ length: Math.min(5, Math.ceil((data?.total || 0) / limit)) }, (_, i) => {
                 const pageNumber = i + 1
                 return (
                   <PaginationItem key={pageNumber}>
-                    <PaginationLink 
+                    <PaginationLink
                       href={`/admin/transactions?page=${pageNumber}&limit=${limit}`}
                       isActive={pageNumber === page}
                     >
@@ -405,9 +470,9 @@ export default function TransactionsPage() {
                   </PaginationItem>
                 )
               })}
-              
+
               <PaginationItem>
-                <PaginationLink 
+                <PaginationLink
                   href={`/admin/transactions?page=${page + 1}&limit=${limit}`}
                   isDisabled={!data || page >= Math.ceil(data.total / limit)}
                 >

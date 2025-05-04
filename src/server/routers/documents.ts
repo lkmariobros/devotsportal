@@ -1,13 +1,6 @@
 import { z } from 'zod'
 import { router, protectedProcedure } from '../trpc'
 import { TRPCError } from '@trpc/server'
-import { createClient } from '@supabase/supabase-js'
-
-// Create Supabase client for storage operations
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-)
 
 export const documentsRouter = router({
   upload: protectedProcedure
@@ -21,6 +14,7 @@ export const documentsRouter = router({
     .mutation(async ({ input, ctx }) => {
       const { transactionId, name, documentType, fileBase64, mimeType } = input
       const userId = ctx.user.id
+      const { supabase } = ctx
       
       try {
         // Convert base64 to buffer

@@ -29,17 +29,17 @@ export function LoginDialog({ onSuccess }: LoginDialogProps) {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Simulate login process
     setTimeout(() => {
       setIsLoading(false);
       setOpen(false);
-      
+
       // Navigate to dashboard or call success callback
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push("/dashboard");
+        router.push("/agent/dashboard");
       }
     }, 1000);
   };

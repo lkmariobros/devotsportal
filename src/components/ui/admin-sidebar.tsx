@@ -34,7 +34,7 @@ import {
   RiArrowDownSLine,
 } from "@remixicon/react";
 import { useRouter, usePathname } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClientSupabaseClient } from "@/utils/supabase/client";
 
 // Admin navigation data with updated structure
 const adminNavData = {
@@ -55,7 +55,7 @@ const adminNavData = {
         },
         {
           title: "Transactions",
-          url: "/transactions",
+          url: "/admin-dashboard/transactions",
           icon: RiBardLine,
         },
         {
@@ -101,18 +101,18 @@ export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const [activePath, setActivePath] = React.useState(pathname || "");
   const [isSigningOut, setIsSigningOut] = React.useState(false);
   const [expandedMenus, setExpandedMenus] = React.useState<Record<string, boolean>>({});
-  
+
   React.useEffect(() => {
     setActivePath(pathname || "");
-    
+
     // Auto-expand menus based on current path
     const newExpandedState = {...expandedMenus};
-    
+
     // Check if we should expand the Agent Management section
     adminNavData.navMain.forEach(group => {
       group.items.forEach(item => {
         if (item.hasSubItems && item.subItems) {
-          const shouldExpand = item.subItems.some(subItem => 
+          const shouldExpand = item.subItems.some(subItem =>
             pathname === subItem.url || pathname.startsWith(subItem.url)
           );
           if (shouldExpand) {
@@ -121,7 +121,7 @@ export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
         }
       });
     });
-    
+
     setExpandedMenus(newExpandedState);
   }, [pathname]);
 
@@ -135,11 +135,15 @@ export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
   async function handleSignOut() {
     try {
       setIsSigningOut(true);
-      const supabase = createClientComponentClient();
+      const supabase = createClientSupabaseClient();
       await supabase.auth.signOut();
-      router.push("/login"); // Explicitly redirect to login
+      router.push("/"); // Redirect to root (login page)
     } catch (error) {
       console.error("Error signing out:", error);
+      // Fallback for development mode
+      if (process.env.NODE_ENV === 'development') {
+        window.location.href = '/';
+      }
     } finally {
       setIsSigningOut(false);
     }
@@ -164,11 +168,11 @@ export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
                   // For items with subitems (like Agent Management)
                   if (item.hasSubItems && item.subItems) {
                     const isExpanded = expandedMenus[item.title] || false;
-                    const hasActiveSubItem = item.subItems.some(subItem => 
-                      activePath === subItem.url || 
+                    const hasActiveSubItem = item.subItems.some(subItem =>
+                      activePath === subItem.url ||
                       (subItem.url !== "/" && activePath.startsWith(subItem.url))
                     );
-                    
+
                     return (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
@@ -184,18 +188,18 @@ export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
                             />
                           )}
                           <span>{item.title}</span>
-                          <RiArrowDownSLine 
-                            className={`ml-auto transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
-                            size={18} 
+                          <RiArrowDownSLine
+                            className={`ml-auto transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                            size={18}
                           />
                         </SidebarMenuButton>
-                        
+
                         {isExpanded && (
                           <SidebarMenuSub>
                             {item.subItems.map(subItem => {
-                              const isSubItemActive = activePath === subItem.url || 
+                              const isSubItemActive = activePath === subItem.url ||
                                 (subItem.url !== "/" && activePath.startsWith(subItem.url));
-                              
+
                               return (
                                 <SidebarMenuSubItem key={subItem.title}>
                                   <SidebarMenuSubButton
@@ -214,10 +218,10 @@ export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
                       </SidebarMenuItem>
                     );
                   }
-                  
+
                   // For regular items without subitems
                   const isActive = item.url ? (
-                    activePath === item.url || 
+                    activePath === item.url ||
                     (item.url !== "/" && activePath.startsWith(item.url))
                   ) : false;
 
@@ -251,7 +255,7 @@ export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
         <hr className="border-t border-border mx-2 -mt-px" />
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton 
+            <SidebarMenuButton
               className="font-medium gap-3 h-9 rounded-md bg-gradient-to-r hover:bg-transparent hover:from-sidebar-accent hover:to-sidebar-accent/40 data-[active=true]:from-primary/20 data-[active=true]:to-primary/5 [&>svg]:size-auto"
               onClick={handleSignOut}
               disabled={isSigningOut}

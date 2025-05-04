@@ -13,12 +13,12 @@ interface AuditLog {
 }
 
 function TransactionHistory({ transactionId }: { transactionId: string }) {
-  const { data: auditLogs, isLoading } = trpc.admin.getTransactionAuditLogs.useQuery({ 
-    transactionId 
+  const { data: auditLogs, isLoading } = trpc.transactions.getTransactionAuditLogs.useQuery({
+    transactionId
   })
-  
+
   if (isLoading) return <Skeleton className="h-40 w-full" />
-  
+
   return (
     <div className="space-y-4">
       {auditLogs?.length ? (

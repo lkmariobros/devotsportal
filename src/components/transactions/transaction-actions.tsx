@@ -24,29 +24,46 @@ export function TransactionActions({ transaction }: TransactionActionsProps) {
   const [isApproveOpen, setIsApproveOpen] = useState(false)
   const [isRejectOpen, setIsRejectOpen] = useState(false)
   const [notes, setNotes] = useState("")
-  
+
+  // Get the current version of the transaction for optimistic concurrency control
+  const currentVersion = transaction.version || 1
+
   const approveTransaction = trpc.transactions.approveTransaction.useMutation({
-    onSuccess: () => {
+    onSuccess: (result) => {
       toast.success("Transaction approved successfully")
       setIsApproveOpen(false)
       router.refresh()
     },
     onError: (error) => {
-      toast.error(`Error approving transaction: ${error.message}`)
+      // Handle version mismatch errors specially
+      if (error.message.includes('version mismatch')) {
+        toast.error(
+          "This transaction has been modified by another user. Please refresh and try again."
+        )
+      } else {
+        toast.error(`Error approving transaction: ${error.message}`)
+      }
     }
   })
-  
+
   const rejectTransaction = trpc.transactions.rejectTransaction.useMutation({
-    onSuccess: () => {
+    onSuccess: (result) => {
       toast.success("Transaction rejected successfully")
       setIsRejectOpen(false)
       router.refresh()
     },
     onError: (error) => {
-      toast.error(`Error rejecting transaction: ${error.message}`)
+      // Handle version mismatch errors specially
+      if (error.message.includes('version mismatch')) {
+        toast.error(
+          "This transaction has been modified by another user. Please refresh and try again."
+        )
+      } else {
+        toast.error(`Error rejecting transaction: ${error.message}`)
+      }
     }
   })
-  
+
   // Don't show actions if transaction is already approved or rejected
   if (transaction.status !== "Pending") {
     return (
@@ -57,24 +74,24 @@ export function TransactionActions({ transaction }: TransactionActionsProps) {
       </div>
     )
   }
-  
+
   return (
     <>
       <div className="flex items-center gap-2">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={() => setIsApproveOpen(true)}
         >
           Approve
         </Button>
-        <Button 
-          variant="destructive" 
+        <Button
+          variant="destructive"
           onClick={() => setIsRejectOpen(true)}
         >
           Reject
         </Button>
       </div>
-      
+
       {/* Approve Dialog */}
       <Dialog open={isApproveOpen} onOpenChange={setIsApproveOpen}>
         <DialogContent>
@@ -90,16 +107,17 @@ export function TransactionActions({ transaction }: TransactionActionsProps) {
             onChange={(e) => setNotes(e.target.value)}
           />
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsApproveOpen(false)}
             >
               Cancel
             </Button>
-            <Button 
-              onClick={() => approveTransaction.mutate({ 
-                id: transaction.id, 
-                notes 
+            <Button
+              onClick={() => approveTransaction.mutate({
+                id: transaction.id,
+                notes,
+                expectedVersion: currentVersion
               })}
               disabled={approveTransaction.isPending}
             >
@@ -108,7 +126,7 @@ export function TransactionActions({ transaction }: TransactionActionsProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* Reject Dialog */}
       <Dialog open={isRejectOpen} onOpenChange={setIsRejectOpen}>
         <DialogContent>
@@ -124,17 +142,18 @@ export function TransactionActions({ transaction }: TransactionActionsProps) {
             onChange={(e) => setNotes(e.target.value)}
           />
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsRejectOpen(false)}
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               variant="destructive"
-              onClick={() => rejectTransaction.mutate({ 
-                id: transaction.id, 
-                notes 
+              onClick={() => rejectTransaction.mutate({
+                id: transaction.id,
+                notes,
+                expectedVersion: currentVersion
               })}
               disabled={rejectTransaction.isPending}
             >

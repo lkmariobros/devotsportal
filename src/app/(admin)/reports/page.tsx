@@ -1,11 +1,24 @@
-"use client"
+"use server"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import DatePicker from "@/components/reusable-ui/date-picker"
-import { DateRange } from "react-day-picker"
-import { RiDownloadLine, RiFileChartLine } from "@remixicon/react"
-import { BarChart, Bar } from "recharts"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+
+export default async function ReportsPage() {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight">
+          Reports
+        </h1>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Reports</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Reports functionality is coming soon.</p>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

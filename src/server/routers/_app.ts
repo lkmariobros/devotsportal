@@ -9,6 +9,7 @@ import { createTRPCContext } from '../trpc'
 import { analyticsRouter } from './analytics'
 import { adminRouter } from './admin'
 import { commissionsRouter } from './commissions'
+import { agentsRouter } from './agents'
 
 export const appRouter = router({
   transactions: transactionsRouter,
@@ -18,7 +19,8 @@ export const appRouter = router({
   analytics: analyticsRouter,
   admin: adminRouter,
   commissions: commissionsRouter,
-  
+  agents: agentsRouter,
+
   // Get all commissions
   getAllCommissions: adminProcedure
     .input(z.object({
@@ -30,7 +32,7 @@ export const appRouter = router({
     .query(async ({ ctx, input }) => {
       const { supabase } = ctx
       const { status, agentId, limit, offset } = input
-      
+
       let query = supabase
         .from('commissions')
         .select(`
@@ -38,21 +40,21 @@ export const appRouter = router({
           property_transactions(id, transaction_date, transaction_value),
           profiles(first_name, last_name, email)
         `, { count: 'exact' })
-      
+
       if (status) query = query.eq('status', status)
       if (agentId) query = query.eq('agent_id', agentId)
-      
+
       const { data, error, count } = await query
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1)
-        
+
       if (error) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: error.message,
         })
       }
-      
+
       return {
         commissions: data,
         total: count || 0,

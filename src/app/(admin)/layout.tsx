@@ -27,6 +27,9 @@ export default function AdminLayout({
     console.log("AdminLayout rendered");
   }, []);
 
+  // In a production environment, we would add authentication checks here
+  // to ensure only admin users can access this layout
+
   return (
     <SidebarProvider>
       <div className="grid min-h-screen w-full grid-cols-[auto_1fr]">
@@ -42,7 +45,7 @@ export default function AdminLayout({
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="/admin/dashboard">
+                    <BreadcrumbLink href="/admin-dashboard">
                       <RiScanLine size={22} aria-hidden="true" />
                       <span className="sr-only">Admin Dashboard</span>
                     </BreadcrumbLink>

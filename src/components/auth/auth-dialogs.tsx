@@ -36,7 +36,7 @@ export function AuthDialogs({ initialView = "login" }: AuthDialogsProps) {
       <DialogTrigger asChild>
         <Button variant="outline">Get Started</Button>
       </DialogTrigger>
-      
+
       <DialogContent>
         {view === "choice" && (
           <div className="flex flex-col items-center gap-4">
@@ -61,7 +61,7 @@ export function AuthDialogs({ initialView = "login" }: AuthDialogsProps) {
                 Choose an option to continue
               </DialogDescription>
             </DialogHeader>
-            
+
             <div className="flex w-full flex-col gap-2">
               <Button onClick={() => setView("login")}>Sign in</Button>
               <Button variant="outline" onClick={() => setView("signup")}>
@@ -70,7 +70,7 @@ export function AuthDialogs({ initialView = "login" }: AuthDialogsProps) {
             </div>
           </div>
         )}
-        
+
         {view === "login" && (
           <div className="flex flex-col items-center gap-2">
             <div
@@ -94,10 +94,10 @@ export function AuthDialogs({ initialView = "login" }: AuthDialogsProps) {
                 Enter your credentials to login to your account.
               </DialogDescription>
             </DialogHeader>
-            
+
             {/* Login form content */}
             <LoginFormContent onClose={() => setOpen(false)} />
-            
+
             <div className="mt-4 text-center text-sm">
               Don't have an account?{" "}
               <Button
@@ -110,7 +110,7 @@ export function AuthDialogs({ initialView = "login" }: AuthDialogsProps) {
             </div>
           </div>
         )}
-        
+
         {view === "signup" && (
           <div className="flex flex-col items-center gap-2">
             <div
@@ -134,10 +134,10 @@ export function AuthDialogs({ initialView = "login" }: AuthDialogsProps) {
                 Enter your information to create a new account.
               </DialogDescription>
             </DialogHeader>
-            
+
             {/* Signup form content */}
             <SignupFormContent onClose={() => setOpen(false)} />
-            
+
             <div className="mt-4 text-center text-sm">
               Already have an account?{" "}
               <Button
@@ -162,19 +162,19 @@ interface FormContentProps {
 function LoginFormContent({ onClose }: FormContentProps) {
   const id = useId();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Simulate login
     setTimeout(() => {
       setIsLoading(false);
       onClose();
-      window.location.href = "/dashboard";
+      window.location.href = "/agent/dashboard";
     }, 1000);
   };
-  
+
   return (
     <form className="w-full space-y-5" onSubmit={handleSubmit}>
       <div className="space-y-4">
@@ -206,11 +206,11 @@ function LoginFormContent({ onClose }: FormContentProps) {
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? "Signing in..." : "Sign in"}
       </Button>
-      
+
       <div className="flex items-center gap-3 before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border">
         <span className="text-xs text-muted-foreground">Or</span>
       </div>
-      
+
       <Button variant="outline" type="button" className="w-full">
         Login with Google
       </Button>
@@ -221,19 +221,19 @@ function LoginFormContent({ onClose }: FormContentProps) {
 function SignupFormContent({ onClose }: FormContentProps) {
   const id = useId();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Simulate signup
     setTimeout(() => {
       setIsLoading(false);
       onClose();
-      window.location.href = "/dashboard";
+      window.location.href = "/agent/dashboard";
     }, 1000);
   };
-  
+
   return (
     <form className="w-full space-y-5" onSubmit={handleSubmit}>
       <div className="space-y-4">
@@ -264,11 +264,11 @@ function SignupFormContent({ onClose }: FormContentProps) {
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? "Creating account..." : "Create account"}
       </Button>
-      
+
       <div className="flex items-center gap-3 before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border">
         <span className="text-xs text-muted-foreground">Or</span>
       </div>
-      
+
       <Button variant="outline" type="button" className="w-full">
         Sign up with Google
       </Button>
