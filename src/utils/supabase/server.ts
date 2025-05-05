@@ -2,12 +2,12 @@ import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { Database } from '@/types/supabase';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { ENV } from '../../env.js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY, NODE_ENV } from '../../env-config.js';
 
 export function createServerSupabaseClient() {
   try {
     // Create a direct client without relying on environment variables
-    return createClient<Database>(ENV.SUPABASE_URL, ENV.SUPABASE_ANON_KEY);
+    return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
   } catch (error) {
     console.error('Error creating Supabase client:', error);
     throw error;
@@ -17,7 +17,7 @@ export function createServerSupabaseClient() {
 // Helper function to check if a user is an admin
 export async function isUserAdmin() {
   // During development, always return true
-  if (process.env.NODE_ENV === 'development') {
+  if (NODE_ENV === 'development') {
     return true;
   }
 
