@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "node disable-eslint.js",
+  "buildCommand": "npm run build",
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["sin1"],

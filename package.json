@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "node disable-eslint.js",
-    "vercel-build": "node disable-eslint.js",
+    "prebuild": "node prebuild.js",
+    "build": "npm run prebuild && next build --no-lint",
+    "vercel-build": "npm run prebuild && next build --no-lint",
     "start": "next start",
     "lint": "next lint --no-error-on-unmatched-pattern"
   },
