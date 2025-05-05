@@ -11,10 +11,31 @@ import { useState, Suspense, useMemo } from "react";
 import { trpc } from "@/utils/trpc/client";
 import { DateRange } from "react-day-picker";
 import { exportToCsv } from "../../../utils/export-helpers";
-import { formatCurrency, formatDate } from "@/lib/utils";
 import { TransactionsChart } from "./transactions-chart";
 import { CommissionForecastChart } from "./commission-forecast-chart";
 import { AgentActivity } from "./agent-activity";
+
+// Inline utils functions to avoid import issues
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-MY', {
+    style: 'currency',
+    currency: 'MYR',
+  }).format(amount);
+}
+
+function formatDate(dateString: string): string {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(date);
+}
+
+function cn(...inputs: any[]): string {
+  return inputs.filter(Boolean).join(' ');
+}
 
 // Simple UI components to avoid import issues
 function SimpleCard({ children, className = '' }: { children: React.ReactNode, className?: string }) {
