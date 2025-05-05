@@ -11,6 +11,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
     dirs: [],
+    ignoreDuringBuilds: true,
   },
 
   // Completely disable TypeScript checking in build

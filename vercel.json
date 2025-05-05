@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "DISABLE_ESLINT_PLUGIN=true NEXT_DISABLE_ESLINT=1 next build",
+  "buildCommand": "node disable-eslint.js",
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["sin1"],

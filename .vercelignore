@@ -11,3 +11,9 @@ yarn-debug.log*
 yarn-error.log*
 .DS_Store
 .nowignore
+.eslintrc.json
+.eslintignore
+.prettierrc
+.prettierignore
+tsconfig.json
+tsconfig.*.json

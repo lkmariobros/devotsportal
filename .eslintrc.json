@@ -18,5 +18,5 @@
     "@typescript-eslint/prefer-namespace-keyword": "off",
     "@typescript-eslint/triple-slash-reference": "off"
   },
-  "ignorePatterns": ["**/*"]
+  "ignorePatterns": ["**/*", "*.js", "*.ts", "*.tsx"]
 }

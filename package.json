@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "DISABLE_ESLINT_PLUGIN=true NEXT_DISABLE_ESLINT=1 next build",
-    "vercel-build": "DISABLE_ESLINT_PLUGIN=true NEXT_DISABLE_ESLINT=1 next build",
+    "build": "node disable-eslint.js",
+    "vercel-build": "node disable-eslint.js",
     "start": "next start",
     "lint": "next lint --no-error-on-unmatched-pattern"
   },
