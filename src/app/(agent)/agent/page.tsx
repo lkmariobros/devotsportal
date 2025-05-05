@@ -2,7 +2,7 @@
 
 import { RiAddLine } from "@remixicon/react"
 import Link from "next/link"
-import { createClientSupabaseClient } from "@/utils/supabase/client"
+import { createClientSupabaseClient } from "@/utils/supabase/simple-client"
 import { useEffect, useState } from "react"
 
 // Simple UI components to avoid import issues
