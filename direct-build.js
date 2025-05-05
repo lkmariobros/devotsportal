@@ -22,9 +22,10 @@ function copyUIComponents() {
   ensureDirectoryExists('temp-components/lib');
   ensureDirectoryExists('temp-components/transactions');
   ensureDirectoryExists('temp-components/utils/supabase');
+  ensureDirectoryExists('temp-components/contexts');
 
   // Copy UI components
-  const components = ['card', 'avatar', 'badge'];
+  const components = ['card', 'avatar', 'badge', 'button', 'checkbox', 'dropdown-menu', 'input', 'select', 'table', 'pagination', 'tabs', 'skeleton'];
   components.forEach(component => {
     // First try to use the source components
     const sourcePath = 'src/components/ui/' + component + '.tsx';
@@ -43,14 +44,219 @@ function copyUIComponents() {
   });
 
   // Copy utils
-  if (fs.existsSync('src/lib/utils.ts')) {
+  if (fs.existsSync('src/lib/simple-utils.ts')) {
+    fs.copyFileSync('src/lib/simple-utils.ts', 'temp-components/lib/utils.ts');
+    console.log('Copied simple-utils.ts to utils.ts');
+  } else if (fs.existsSync('src/lib/utils.ts')) {
     fs.copyFileSync('src/lib/utils.ts', 'temp-components/lib/utils.ts');
     console.log('Copied utils.ts');
   } else if (fs.existsSync('backup-components/utils.ts')) {
     fs.copyFileSync('backup-components/utils.ts', 'temp-components/lib/utils.ts');
     console.log('Copied backup utils.ts');
   } else {
-    console.log('Warning: utils.ts not found in either source or backup');
+    // Create a simplified utils.ts file
+    const utilsContent = `import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+/**
+ * Combines class names using clsx and tailwind-merge
+ */
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+/**
+ * Formats a date string
+ */
+export function formatDate(dateString: string): string {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(date)
+}
+
+/**
+ * Formats a currency value
+ */
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-MY', {
+    style: 'currency',
+    currency: 'MYR',
+  }).format(amount)
+}
+
+/**
+ * Generates a random ID
+ */
+export function generateId(): string {
+  return Math.random().toString(36).substring(2, 9)
+}
+
+/**
+ * Delays execution for a specified number of milliseconds
+ */
+export function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}`;
+
+    fs.writeFileSync('temp-components/lib/utils.ts', utilsContent);
+    console.log('Created simplified utils.ts');
+  }
+
+  // Copy transaction form context
+  if (fs.existsSync('src/contexts/simple-transaction-form-context.tsx')) {
+    fs.copyFileSync('src/contexts/simple-transaction-form-context.tsx', 'temp-components/contexts/transaction-form-context.tsx');
+    console.log('Copied simple-transaction-form-context.tsx to transaction-form-context.tsx');
+  } else if (fs.existsSync('src/contexts/transaction-form-context.tsx')) {
+    fs.copyFileSync('src/contexts/transaction-form-context.tsx', 'temp-components/contexts/transaction-form-context.tsx');
+    console.log('Copied transaction-form-context.tsx');
+  } else {
+    // Create a simplified transaction form context
+    const contextContent = `"use client"
+
+import React, { createContext, useContext, useState } from "react"
+
+// Define the form data type
+export interface TransactionFormData {
+  step: number
+  transactionType: string
+  marketType: string
+  propertyType: string
+  propertyAddress: string
+  propertyCity: string
+  propertyState: string
+  propertyZip: string
+  clientName: string
+  clientEmail: string
+  clientPhone: string
+  cobroking: boolean
+  cobrokingAgentName: string
+  cobrokingAgentCompany: string
+  transactionValue: number
+  commissionRate: number
+  commissionAmount: number
+  documents: any[]
+}
+
+// Default form data
+const defaultFormData: TransactionFormData = {
+  step: 1,
+  transactionType: "",
+  marketType: "",
+  propertyType: "",
+  propertyAddress: "",
+  propertyCity: "",
+  propertyState: "",
+  propertyZip: "",
+  clientName: "",
+  clientEmail: "",
+  clientPhone: "",
+  cobroking: false,
+  cobrokingAgentName: "",
+  cobrokingAgentCompany: "",
+  transactionValue: 0,
+  commissionRate: 0,
+  commissionAmount: 0,
+  documents: []
+}
+
+// Create the context
+interface TransactionFormContextType {
+  formData: TransactionFormData
+  setFormData: React.Dispatch<React.SetStateAction<TransactionFormData>>
+  nextStep: () => void
+  prevStep: () => void
+  goToStep: (step: number) => void
+  updateFormField: <K extends keyof TransactionFormData>(
+    field: K,
+    value: TransactionFormData[K]
+  ) => void
+  resetForm: () => void
+  isStepComplete: (step: number) => boolean
+}
+
+const TransactionFormContext = createContext<TransactionFormContextType | undefined>(undefined)
+
+// Create the provider
+export function TransactionFormProvider({ children }: { children: React.ReactNode }) {
+  const [formData, setFormData] = useState<TransactionFormData>(defaultFormData)
+
+  const nextStep = () => {
+    setFormData(prev => ({ ...prev, step: Math.min(prev.step + 1, 7) }))
+  }
+
+  const prevStep = () => {
+    setFormData(prev => ({ ...prev, step: Math.max(prev.step - 1, 1) }))
+  }
+
+  const goToStep = (step: number) => {
+    setFormData(prev => ({ ...prev, step: Math.min(Math.max(step, 1), 7) }))
+  }
+
+  const updateFormField = <K extends keyof TransactionFormData>(
+    field: K,
+    value: TransactionFormData[K]
+  ) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const resetForm = () => {
+    setFormData(defaultFormData)
+  }
+
+  const isStepComplete = (step: number): boolean => {
+    switch (step) {
+      case 1: // Transaction Type
+        return !!formData.transactionType && !!formData.marketType
+      case 2: // Property Selection
+        return !!formData.propertyType && !!formData.propertyAddress
+      case 3: // Client Information
+        return !!formData.clientName && !!formData.clientEmail
+      case 4: // Co-Broking Setup
+        return true // Always complete as it's optional
+      case 5: // Commission Calculation
+        return formData.transactionValue > 0 && formData.commissionRate > 0
+      case 6: // Document Upload
+        return true // Always complete as it's optional
+      case 7: // Review
+        return true // Always complete as it's just a review
+      default:
+        return false
+    }
+  }
+
+  return (
+    <TransactionFormContext.Provider
+      value={{
+        formData,
+        setFormData,
+        nextStep,
+        prevStep,
+        goToStep,
+        updateFormField,
+        resetForm,
+        isStepComplete
+      }}
+    >
+      {children}
+    </TransactionFormContext.Provider>
+  )
+}
+
+// Create a hook to use the context
+export function useTransactionForm() {
+  const context = useContext(TransactionFormContext)
+  if (context === undefined) {
+    throw new Error("useTransactionForm must be used within a TransactionFormProvider")
+  }
+  return context
+}`;
+
+    fs.writeFileSync('temp-components/contexts/transaction-form-context.tsx', contextContent);
+    console.log('Created simplified transaction-form-context.tsx');
   }
 
   // Create a simplified transaction-details component
@@ -233,11 +439,38 @@ if (fs.existsSync('temp-components/utils/supabase')) {
   }
 }
 
+// 3.3 Copy contexts from temp location
+if (fs.existsSync('temp-components/contexts')) {
+  console.log('Copying contexts from temp location');
+  ensureDirectoryExists('src/contexts');
+  copyDir('temp-components/contexts', 'src/contexts');
+
+  // Also copy to the agent-layout directory
+  ensureDirectoryExists('src/app/agent-layout/contexts');
+  copyDir('temp-components/contexts', 'src/app/agent-layout/contexts');
+  console.log('Copied contexts to agent-layout');
+
+  // Also copy to the admin-layout directory
+  ensureDirectoryExists('src/app/admin-layout/contexts');
+  copyDir('temp-components/contexts', 'src/app/admin-layout/contexts');
+  console.log('Copied contexts to admin-layout');
+}
+
 // 4. Copy utils from temp location
 if (fs.existsSync('temp-components/lib')) {
   console.log('Copying utils from temp location');
   ensureDirectoryExists('src/lib');
   copyDir('temp-components/lib', 'src/lib');
+
+  // Also copy to the agent-layout directory
+  ensureDirectoryExists('src/app/agent-layout/lib');
+  copyDir('temp-components/lib', 'src/app/agent-layout/lib');
+  console.log('Copied utils to agent-layout');
+
+  // Also copy to the admin-layout directory
+  ensureDirectoryExists('src/app/admin-layout/lib');
+  copyDir('temp-components/lib', 'src/app/admin-layout/lib');
+  console.log('Copied utils to admin-layout');
 }
 
 // Function to ensure a directory exists
