@@ -14,7 +14,7 @@ export async function middleware(request: NextRequest) {
   // In production, this would check admin status
   if (process.env.NODE_ENV === 'production') {
     // Check if the request is for an admin route
-    const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
+    const isAdminRoute = request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/admin-layout')
 
     if (isAdminRoute) {
       // Get the user from Supabase auth
@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
 
       // If user is not an admin, redirect to dashboard
       if (!isAdmin) {
-        return NextResponse.redirect(new URL('/agent/dashboard', request.url))
+        return NextResponse.redirect(new URL('/agent-layout/dashboard', request.url))
       }
     }
   }
