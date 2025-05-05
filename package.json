@@ -5,8 +5,9 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "prebuild": "node prebuild.js",
-    "build": "npm run prebuild && next build --no-lint",
-    "vercel-build": "npm run prebuild && next build --no-lint",
+    "postbuild": "node postbuild.js",
+    "build": "npm run prebuild && next build --no-lint && npm run postbuild",
+    "vercel-build": "npm run prebuild && next build --no-lint && npm run postbuild",
     "start": "next start",
     "lint": "next lint --no-error-on-unmatched-pattern"
   },

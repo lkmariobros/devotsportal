@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "buildCommand": "node prebuild.js && next build --no-lint && node postbuild.js",
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["sin1"],
