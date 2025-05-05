@@ -31,7 +31,7 @@ export default async function TransactionDetailPage({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" asChild>
-            <Link href="/agent-layout/transactions">
+            <Link href="/agent/transactions">
               <ChevronLeft className="h-4 w-4 mr-1" />
               Back to Transactions
             </Link>

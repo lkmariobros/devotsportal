@@ -48,17 +48,17 @@ const agentNavData = {
         },
         {
           title: "My Transactions",
-          url: "/agent-layout/transactions",
+          url: "/agent/transactions",
           icon: RiBardLine,
         },
         {
           title: "My Clients",
-          url: "/agent-layout/clients",
+          url: "/agent/clients",
           icon: RiUserFollowLine,
         },
         {
           title: "Commission",
-          url: "/agent-layout/commission",
+          url: "/agent/commission",
           icon: RiMoneyDollarCircleLine,
         },
       ],
@@ -68,12 +68,12 @@ const agentNavData = {
       items: [
         {
           title: "Profile Settings",
-          url: "/agent-layout/settings",
+          url: "/agent/settings",
           icon: RiSettings3Line,
         },
         {
           title: "Help Center",
-          url: "/agent-layout/help",
+          url: "/agent/help",
           icon: RiLeafLine,
         },
       ],

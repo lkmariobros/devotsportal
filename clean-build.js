@@ -32,9 +32,17 @@ function copyDirFiltered(src, dest, filter) {
 
     // Skip problematic directories
     if (entry.isDirectory()) {
-      // Allow components directory to be copied regardless of path
+      // Always copy components directory
       if (srcPath.includes('components')) {
-        copyDirFiltered(srcPath, destPath, filter);
+        // For components, copy everything
+        copyDirFiltered(srcPath, destPath, () => true);
+        continue;
+      }
+
+      // Always copy lib directory (for utils.ts)
+      if (srcPath.includes('lib')) {
+        // For lib, copy everything
+        copyDirFiltered(srcPath, destPath, () => true);
         continue;
       }
 
@@ -73,7 +81,7 @@ for (const { src, dest } of essentialDirs) {
       copyDirFiltered(
         src,
         dest,
-        (filePath) => true // Copy all files in components directory
+        () => true // Copy all files in components directory
       );
     } else {
       copyDirFiltered(

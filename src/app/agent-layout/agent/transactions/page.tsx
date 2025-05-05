@@ -42,7 +42,7 @@ export default async function TransactionsPage({
         <h1 className="text-2xl font-bold tracking-tight">
           Transactions
         </h1>
-        <Link href="/agent-layout/transactions/new">
+        <Link href="/agent/transactions/new">
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />
             New Transaction
