@@ -1,62 +1,8 @@
-import { createServerSupabaseClient } from '@/utils/supabase/server'
-import { revalidatePath } from 'next/cache'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-
-async function insertTestTransaction() {
-  "use server"
-  try {
-    const supabase = createServerSupabaseClient()
-
-    // Generate a UUID for the transaction
-    const id = crypto.randomUUID()
-
-    // Insert directly with the exact schema structure
-    const { data, error } = await supabase
-      .from('property_transactions')
-      .insert([
-        {
-          id,
-          // Required fields
-          transaction_date: new Date().toISOString().split('T')[0],
-
-          // Optional fields
-          market_type: 'secondary',
-          market_subcategory: 'residential',
-          property_address: '123 Debug Street (Server)',
-          primary_client_name: 'Debug Client (Server)',
-          transaction_value: 500000,
-          status: 'pending',
-
-          // Metadata
-          created_at: new Date(),
-          updated_at: new Date()
-        }
-      ])
-      .select()
-
-    if (error) {
-      console.error('Error inserting test transaction:', error)
-      return { success: false, error: error.message }
-    }
-
-    // Revalidate the transaction pages
-    revalidatePath('/agent/transactions')
-    revalidatePath('/admin-dashboard/transactions')
-
-    return { success: true, data }
-  } catch (error) {
-    console.error('Error in insertTestTransaction:', error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }
-  }
-}
+import { insertTestTransaction } from "./actions"
 
 export default function DebugInsertSimplePage() {
-  // We'll use the server action instead of calling it during render
-
   return (
     <div className="container py-10">
       <h1 className="text-2xl font-bold mb-6">Debug Insert Transaction (Simple)</h1>
@@ -72,12 +18,7 @@ export default function DebugInsertSimplePage() {
           <p>Click the button below to insert a test transaction.</p>
         </CardContent>
         <CardFooter>
-          <form action={async () => {
-            const result = await insertTestTransaction()
-            // Revalidate this page to show the latest results
-            revalidatePath('/debug-insert-simple')
-            return result
-          }}>
+          <form action={insertTestTransaction}>
             <Button type="submit">Insert Test Transaction</Button>
           </form>
         </CardFooter>
