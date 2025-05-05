@@ -78,7 +78,7 @@ function TransactionFormContent({
           console.log("Transaction created successfully:", result.message)
 
           // Redirect to transactions list
-          router.push("/agent/transactions")
+          router.push("/agent-layout/transactions")
         } else {
           // Show error message
           console.error("Error creating transaction:", result?.message)

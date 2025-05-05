@@ -32,7 +32,7 @@ export default function DebugInsertSimplePage() {
           <ol className="list-decimal pl-5 space-y-2">
             <li>
               <strong>Check the agent transactions page:</strong>{' '}
-              <a href="/agent/transactions" className="text-blue-600 hover:underline">
+              <a href="/agent-layout/transactions" className="text-blue-600 hover:underline">
                 Go to Agent Transactions
               </a>
             </li>
@@ -44,7 +44,7 @@ export default function DebugInsertSimplePage() {
             </li>
             <li>
               <strong>Try submitting a transaction through the form:</strong>{' '}
-              <a href="/agent/transactions/new" className="text-blue-600 hover:underline">
+              <a href="/agent-layout/transactions/new" className="text-blue-600 hover:underline">
                 Go to Transaction Form
               </a>
             </li>

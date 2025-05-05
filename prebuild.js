@@ -30,6 +30,14 @@ function copyDir(src, dest) {
   }
 }
 
+// Function to ensure a directory exists
+function ensureDirectoryExists(dir) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+    console.log(`Created directory: ${dir}`);
+  }
+}
+
 // 1. Copy files from (admin) to admin-layout
 if (fs.existsSync('src/app/(admin)')) {
   console.log('Copying files from src/app/(admin) to src/app/admin-layout');
@@ -98,5 +106,25 @@ export const trpc = {
 
 console.log('Creating mock TRPC client');
 fs.writeFileSync('src/utils/trpc/client.ts', mockTrpcClientContent);
+
+// 7. Ensure UI components are available
+console.log('Ensuring UI components are available');
+
+// Ensure the components/ui directory exists
+ensureDirectoryExists('src/components/ui');
+
+// Check if the required UI components exist, if not, copy from reusable-ui
+const requiredComponents = ['card', 'avatar', 'badge'];
+for (const component of requiredComponents) {
+  const uiComponentPath = `src/components/ui/${component}.tsx`;
+  const reusableComponentPath = `src/components/reusable-ui/${component}.tsx`;
+
+  if (!fs.existsSync(uiComponentPath) && fs.existsSync(reusableComponentPath)) {
+    console.log(`Copying ${reusableComponentPath} to ${uiComponentPath}`);
+    fs.copyFileSync(reusableComponentPath, uiComponentPath);
+  } else if (!fs.existsSync(uiComponentPath)) {
+    console.log(`Warning: Component ${component} not found in either ui or reusable-ui directories`);
+  }
+}
 
 console.log('Prebuild completed successfully');

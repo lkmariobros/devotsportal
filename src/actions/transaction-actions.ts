@@ -220,7 +220,7 @@ export async function submitTransaction(data: any) {
     console.log("[DEBUG] Transaction inserted successfully:", transaction ? JSON.stringify(transaction[0], null, 2) : 'No data returned');
 
     // Revalidate the transactions list page
-    revalidatePath('/agent/transactions');
+    revalidatePath("/agent-layout/transactions');
 
     return {
       success: true,
@@ -363,7 +363,7 @@ export async function updateTransactionStatus(id: string, status: string, notes?
     }
 
     // Revalidate the transactions list page
-    revalidatePath('/admin/transactions')
+    revalidatePath("/admin-layout/transactions')
     revalidatePath(`/admin/transactions/${id}`)
 
     return { success: true, data: data[0] }

@@ -14,7 +14,7 @@ export function TransactionList({ transactions, isAdmin = false }: TransactionLi
   // Determine the new transaction link based on whether this is admin or agent view
   const newTransactionLink = isAdmin
     ? "/admin-dashboard/transactions/new"
-    : "/agent/transactions/new"
+    : "/agent-layout/transactions/new"
 
   return (
     <div className="space-y-6">

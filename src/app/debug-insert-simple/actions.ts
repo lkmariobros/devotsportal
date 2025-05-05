@@ -40,7 +40,7 @@ export async function insertTestTransaction() {
     }
     
     // Revalidate the transaction pages
-    revalidatePath('/agent/transactions')
+    revalidatePath("/agent-layout/transactions')
     revalidatePath('/admin-dashboard/transactions')
     revalidatePath('/debug-insert-simple')
     

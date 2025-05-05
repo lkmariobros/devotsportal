@@ -185,7 +185,7 @@ function TransactionFormContent({
               if (result.transactionId) {
                 router.push(`/agent/transactions/success?id=${result.transactionId}`);
               } else {
-                router.push("/agent/transactions/success");
+                router.push("/agent-layout/transactions/success");
               }
             }
           } else {

@@ -177,7 +177,7 @@ export async function updateTransactionStatus(
 
     // Revalidate the transaction pages
     revalidatePath('/transactions')
-    revalidatePath('/agent/transactions')
+    revalidatePath("/agent-layout/transactions')
     revalidatePath(`/transactions/${id}`)
     revalidatePath(`/agent/transactions/${id}`)
 
@@ -283,7 +283,7 @@ export async function storeTransactionFromFallback(data: any) {
 
     // Revalidate the transaction pages
     revalidatePath('/transactions')
-    revalidatePath('/agent/transactions')
+    revalidatePath("/agent-layout/transactions')
 
     return {
       success: true,

@@ -64,7 +64,7 @@ export default async function TransactionSuccessPage({
         </CardContent>
         <CardFooter className="flex justify-center gap-4">
           <Button asChild variant="outline">
-            <Link href="/agent/transactions">
+            <Link href="/agent-layout/transactions">
               View All Transactions
             </Link>
           </Button>
@@ -76,7 +76,7 @@ export default async function TransactionSuccessPage({
             </Button>
           )}
           <Button asChild>
-            <Link href="/agent/transactions/new">
+            <Link href="/agent-layout/transactions/new">
               Create Another Transaction
             </Link>
           </Button>

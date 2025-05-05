@@ -39,7 +39,7 @@ export function SignUpDialog({ onSuccess }: SignUpDialogProps) {
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push("/agent/dashboard");
+        router.push("/agent-layout/dashboard");
       }
     }, 1000);
   };

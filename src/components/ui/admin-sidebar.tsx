@@ -81,12 +81,12 @@ const adminNavData = {
       items: [
         {
           title: "Settings",
-          url: "/admin/settings",
+          url: "/admin-layout/settings",
           icon: RiSettings3Line,
         },
         {
           title: "Help Center",
-          url: "/admin/help",
+          url: "/admin-layout/help",
           icon: RiLeafLine,
         },
       ],

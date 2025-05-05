@@ -146,8 +146,8 @@ export default function SetupDatabasePage() {
               <li>If the table doesn't exist, create it using the SQL provided</li>
               <li>Insert a test transaction to verify the table works</li>
               <li>View the <a href="/debug/transactions" className="text-blue-600 hover:underline">debug transactions page</a> to see all transactions</li>
-              <li>Try submitting a new transaction through the <a href="/agent/transactions/new" className="text-blue-600 hover:underline">transaction form</a></li>
-              <li>View the transactions in the <a href="/agent/transactions" className="text-blue-600 hover:underline">agent portal</a> and <a href="/admin-dashboard/transactions" className="text-blue-600 hover:underline">admin portal</a></li>
+              <li>Try submitting a new transaction through the <a href="/agent-layout/transactions/new" className="text-blue-600 hover:underline">transaction form</a></li>
+              <li>View the transactions in the <a href="/agent-layout/transactions" className="text-blue-600 hover:underline">agent portal</a> and <a href="/admin-dashboard/transactions" className="text-blue-600 hover:underline">admin portal</a></li>
             </ol>
           </CardContent>
         </Card>

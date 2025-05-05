@@ -39,7 +39,7 @@ export default async function TransactionDetailPage({ params }: TransactionDetai
     <div className="container py-6 space-y-6">
       <div>
         <Button asChild variant="ghost" size="sm" className="mb-4">
-          <Link href="/admin/transactions">
+          <Link href="/admin-layout/transactions">
             <ChevronLeft className="mr-2 h-4 w-4" />
             Back to Transactions
           </Link>

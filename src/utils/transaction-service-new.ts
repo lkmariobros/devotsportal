@@ -171,7 +171,7 @@ export async function updateTransactionStatus(
 
     // Revalidate the transaction pages
     revalidatePath('/admin-dashboard/transactions')
-    revalidatePath('/agent/transactions')
+    revalidatePath("/agent-layout/transactions')
     revalidatePath(`/admin-dashboard/transactions/${id}`)
     revalidatePath(`/agent/transactions/${id}`)
 
@@ -253,7 +253,7 @@ export async function storeTransactionFromFallback(data: any) {
     // Revalidate the transaction pages with force option
     console.log('[DEBUG] Revalidating transaction pages')
     revalidatePath('/admin-dashboard/transactions', 'page')
-    revalidatePath('/agent/transactions', 'page')
+    revalidatePath("/agent-layout/transactions', 'page')
 
     // Also revalidate the root paths to ensure layout updates
     revalidatePath('/admin-dashboard', 'layout')

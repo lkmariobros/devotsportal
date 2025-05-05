@@ -137,7 +137,7 @@ export default async function AgentTransactionsFixedPage() {
               </Link>
             </li>
             <li>
-              <Link href="/agent/transactions" className="text-blue-600 hover:underline">
+              <Link href="/agent-layout/transactions" className="text-blue-600 hover:underline">
                 Go to Original Agent Transactions
               </Link>
             </li>

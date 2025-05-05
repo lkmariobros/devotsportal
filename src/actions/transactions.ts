@@ -174,7 +174,7 @@ export async function createTransaction(
     }
 
     // Revalidate the transactions page
-    revalidatePath('/agent/transactions')
+    revalidatePath("/agent-layout/transactions')
 
     // Redirect to the transaction details page
     redirect(`/agent/transactions/${data.id}`)

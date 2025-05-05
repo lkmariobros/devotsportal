@@ -143,7 +143,7 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
       });
 
       // Navigate to agent portal
-      router.push("/agent/dashboard");
+      router.push("/agent-layout/dashboard");
 
       // Reset navigation state after a delay
       setTimeout(() => {

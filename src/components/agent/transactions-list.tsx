@@ -68,7 +68,7 @@ export function TransactionsList({ agentId, limit = 5 }: TransactionsListProps) 
       
       <div className="text-center pt-2">
         <Button variant="link" asChild>
-          <Link href="/agent/transactions">View all transactions</Link>
+          <Link href="/agent-layout/transactions">View all transactions</Link>
         </Button>
       </div>
     </div>

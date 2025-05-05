@@ -171,7 +171,7 @@ function LoginFormContent({ onClose }: FormContentProps) {
     setTimeout(() => {
       setIsLoading(false);
       onClose();
-      window.location.href = "/agent/dashboard";
+      window.location.href = "/agent-layout/dashboard";
     }, 1000);
   };
 
@@ -230,7 +230,7 @@ function SignupFormContent({ onClose }: FormContentProps) {
     setTimeout(() => {
       setIsLoading(false);
       onClose();
-      window.location.href = "/agent/dashboard";
+      window.location.href = "/agent-layout/dashboard";
     }, 1000);
   };
 

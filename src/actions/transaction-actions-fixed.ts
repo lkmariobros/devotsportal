@@ -201,9 +201,9 @@ export async function updateTransactionStatus(id: string, status: string, notes?
     }
 
     // Revalidate paths
-    revalidatePath('/agent/transactions')
+    revalidatePath("/agent-layout/transactions')
     revalidatePath(`/agent/transactions/${id}`)
-    revalidatePath('/admin/transactions')
+    revalidatePath("/admin-layout/transactions')
     revalidatePath(`/admin/transactions/${id}`)
 
     return { success: true, data: data[0] }

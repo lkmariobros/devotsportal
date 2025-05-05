@@ -126,7 +126,7 @@ export default async function DebugTransactionsSimplePage() {
             </li>
             <li>
               <strong>Check the agent transactions page:</strong>{' '}
-              <a href="/agent/transactions" className="text-blue-600 hover:underline">
+              <a href="/agent-layout/transactions" className="text-blue-600 hover:underline">
                 Go to Agent Transactions
               </a>
             </li>

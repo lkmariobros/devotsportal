@@ -39,7 +39,7 @@ export function LoginDialog({ onSuccess }: LoginDialogProps) {
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push("/agent/dashboard");
+        router.push("/agent-layout/dashboard");
       }
     }, 1000);
   };

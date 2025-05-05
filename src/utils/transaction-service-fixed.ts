@@ -131,7 +131,7 @@ export async function submitTransactionFixed(data: any) {
     }
 
     // Revalidate the transaction pages
-    revalidatePath('/agent/transactions')
+    revalidatePath("/agent-layout/transactions')
     revalidatePath('/admin-dashboard/transactions')
 
     return {

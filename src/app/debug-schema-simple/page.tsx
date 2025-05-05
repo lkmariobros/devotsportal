@@ -102,7 +102,7 @@ export default async function DebugSchemaSimplePage() {
             </li>
             <li>
               <strong>Try submitting a transaction through the form:</strong>{' '}
-              <a href="/agent/transactions/new" className="text-blue-600 hover:underline">
+              <a href="/agent-layout/transactions/new" className="text-blue-600 hover:underline">
                 Go to Transaction Form
               </a>
             </li>

@@ -32,6 +32,12 @@ function copyDirFiltered(src, dest, filter) {
 
     // Skip problematic directories
     if (entry.isDirectory()) {
+      // Allow components directory to be copied regardless of path
+      if (srcPath.includes('components')) {
+        copyDirFiltered(srcPath, destPath, filter);
+        continue;
+      }
+
       if (
         srcPath.includes('(admin)') ||
         srcPath.includes('(agent)') ||
@@ -62,14 +68,23 @@ const essentialDirs = [
 for (const { src, dest } of essentialDirs) {
   if (fs.existsSync(src)) {
     console.log(`Copying ${src} to ${dest}...`);
-    copyDirFiltered(
-      src,
-      dest,
-      (filePath) => 
-        !filePath.includes('debug') && 
-        !filePath.includes('(admin)') && 
-        !filePath.includes('(agent)')
-    );
+    // Special handling for components directory - copy everything
+    if (src === 'src/components') {
+      copyDirFiltered(
+        src,
+        dest,
+        (filePath) => true // Copy all files in components directory
+      );
+    } else {
+      copyDirFiltered(
+        src,
+        dest,
+        (filePath) =>
+          !filePath.includes('debug') &&
+          !filePath.includes('(admin)') &&
+          !filePath.includes('(agent)')
+      );
+    }
   }
 }
 
@@ -148,17 +163,17 @@ try {
   process.chdir(tempDir);
   execSync('npm install', { stdio: 'inherit' });
   execSync('next build', { stdio: 'inherit' });
-  
+
   // Copy the build output back to the original directory
   console.log('Copying build output back to original directory...');
   process.chdir(__dirname);
-  
+
   if (fs.existsSync('.next')) {
     fs.rmSync('.next', { recursive: true, force: true });
   }
-  
+
   copyDirFiltered(path.join(tempDir, '.next'), '.next', () => true);
-  
+
   console.log('Build completed successfully!');
 } catch (error) {
   console.error('Build failed:', error);
