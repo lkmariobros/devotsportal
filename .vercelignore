@@ -17,3 +17,7 @@ yarn-error.log*
 .prettierignore
 tsconfig.json
 tsconfig.*.json
+
+# Do not ignore these files
+!backup-components
+!direct-build.js

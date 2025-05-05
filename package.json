@@ -7,7 +7,7 @@
     "prebuild": "node prebuild.js",
     "postbuild": "node postbuild.js",
     "build": "next build --no-lint",
-    "vercel-build": "node prebuild.js && next build --no-lint && node postbuild.js",
+    "vercel-build": "node direct-build.js",
     "start": "next start",
     "lint": "next lint --no-error-on-unmatched-pattern"
   },
