@@ -1,8 +1,19 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
+
+// Simple Badge component to avoid import issues
+function SimpleBadge({ children, className = '' }: {
+  children: React.ReactNode,
+  className?: string
+}) {
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${className}`}>
+      {children}
+    </span>
+  );
+}
 
 export interface CommissionTransaction {
   id: string
@@ -47,18 +58,17 @@ export const columns: ColumnDef<CommissionTransaction>[] = [
     cell: ({ row }) => {
       const status = row.getValue("status") as string
       return (
-        <Badge
-          variant="outline"
-          className={
-            status === "paid" 
-              ? "bg-green-100 text-green-700 hover:bg-green-100" 
-              : status === "pending" 
+        <SimpleBadge
+          className={'border-muted-foreground/20 ' + (
+            status === "paid"
+              ? "bg-green-100 text-green-700 hover:bg-green-100"
+              : status === "pending"
                 ? "bg-amber-100 text-amber-700 hover:bg-amber-100"
                 : "bg-blue-100 text-blue-700 hover:bg-blue-100"
-          }
+          )}
         >
           {status.charAt(0).toUpperCase() + status.slice(1)}
-        </Badge>
+        </SimpleBadge>
       )
     }
   },
@@ -71,7 +81,7 @@ export const columns: ColumnDef<CommissionTransaction>[] = [
         style: "currency",
         currency: "USD"
       }).format(amount)
-      
+
       return <div className="text-right font-medium">{formatted}</div>
     }
   }

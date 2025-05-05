@@ -11,7 +11,27 @@ import {
   Tooltip,
   Legend
 } from "recharts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
+// Simple UI components to avoid import issues
+function SimpleCard({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}>{children}</div>;
+}
+
+function SimpleCardHeader({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`flex flex-col space-y-1.5 p-6 ${className}`}>{children}</div>;
+}
+
+function SimpleCardTitle({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`}>{children}</h3>;
+}
+
+function SimpleCardDescription({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <p className={`text-sm text-muted-foreground ${className}`}>{children}</p>;
+}
+
+function SimpleCardContent({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`p-6 pt-0 ${className}`}>{children}</div>;
+}
 
 interface ChartData {
   month: string
@@ -28,39 +48,39 @@ interface CommissionDetailsChartProps {
 
 export function CommissionDetailsChart({ data, isLoading, filter }: CommissionDetailsChartProps) {
   const id = useId()
-  
+
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Commission Breakdown</CardTitle>
-          <CardDescription>Monthly commission distribution</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <SimpleCard>
+        <SimpleCardHeader>
+          <SimpleCardTitle>Commission Breakdown</SimpleCardTitle>
+          <SimpleCardDescription>Monthly commission distribution</SimpleCardDescription>
+        </SimpleCardHeader>
+        <SimpleCardContent>
           <div className="h-80 flex items-center justify-center">
             <div className="animate-pulse text-muted-foreground">Loading chart data...</div>
           </div>
-        </CardContent>
-      </Card>
+        </SimpleCardContent>
+      </SimpleCard>
     )
   }
-  
+
   if (!data || data.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Commission Breakdown</CardTitle>
-          <CardDescription>Monthly commission distribution</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <SimpleCard>
+        <SimpleCardHeader>
+          <SimpleCardTitle>Commission Breakdown</SimpleCardTitle>
+          <SimpleCardDescription>Monthly commission distribution</SimpleCardDescription>
+        </SimpleCardHeader>
+        <SimpleCardContent>
           <div className="h-80 flex items-center justify-center text-muted-foreground">
             No commission data available for the selected period
           </div>
-        </CardContent>
-      </Card>
+        </SimpleCardContent>
+      </SimpleCard>
     )
   }
-  
+
   // Calculate totals
   const totals = data.reduce(
     (acc, item) => {
@@ -72,14 +92,14 @@ export function CommissionDetailsChart({ data, isLoading, filter }: CommissionDe
     },
     { pending: 0, paid: 0, projected: 0, total: 0 }
   )
-  
+
   return (
-    <Card>
-      <CardHeader>
+    <SimpleCard>
+      <SimpleCardHeader>
         <div className="flex flex-col md:flex-row justify-between">
           <div>
-            <CardTitle>Commission Breakdown</CardTitle>
-            <CardDescription>Monthly commission distribution</CardDescription>
+            <SimpleCardTitle>Commission Breakdown</SimpleCardTitle>
+            <SimpleCardDescription>Monthly commission distribution</SimpleCardDescription>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 md:mt-0">
             <div className="space-y-1">
@@ -100,8 +120,8 @@ export function CommissionDetailsChart({ data, isLoading, filter }: CommissionDe
             </div>
           </div>
         </div>
-      </CardHeader>
-      <CardContent>
+      </SimpleCardHeader>
+      <SimpleCardContent>
         <div className="h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
@@ -110,35 +130,35 @@ export function CommissionDetailsChart({ data, isLoading, filter }: CommissionDe
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
-              <YAxis 
+              <YAxis
                 tickFormatter={(value) => `$${value}`}
               />
-              <Tooltip 
+              <Tooltip
                 formatter={(value) => [`$${Number(value).toLocaleString()}`, undefined]}
               />
               <Legend />
-              <Bar 
-                dataKey="paid" 
-                name="Paid" 
-                stackId="a" 
-                fill="#22c55e" 
+              <Bar
+                dataKey="paid"
+                name="Paid"
+                stackId="a"
+                fill="#22c55e"
               />
-              <Bar 
-                dataKey="pending" 
-                name="Pending" 
-                stackId="a" 
-                fill="#f59e0b" 
+              <Bar
+                dataKey="pending"
+                name="Pending"
+                stackId="a"
+                fill="#f59e0b"
               />
-              <Bar 
-                dataKey="projected" 
-                name="Projected" 
-                stackId="a" 
-                fill="#3b82f6" 
+              <Bar
+                dataKey="projected"
+                name="Projected"
+                stackId="a"
+                fill="#3b82f6"
               />
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </CardContent>
-    </Card>
+      </SimpleCardContent>
+    </SimpleCard>
   )
 }
