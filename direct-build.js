@@ -9,7 +9,7 @@ console.log('Starting direct build process...');
 function ensureDirectoryExists(dir) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
-    console.log(`Created directory: ${dir}`);
+    console.log('Created directory: ' + dir);
   }
 }
 
@@ -25,18 +25,18 @@ function copyUIComponents() {
   const components = ['card', 'avatar', 'badge'];
   components.forEach(component => {
     // First try to use the source components
-    const sourcePath = `src/components/ui/${component}.tsx`;
-    const backupPath = `backup-components/${component}.tsx`;
-    const destPath = `temp-components/ui/${component}.tsx`;
+    const sourcePath = 'src/components/ui/' + component + '.tsx';
+    const backupPath = 'backup-components/' + component + '.tsx';
+    const destPath = 'temp-components/ui/' + component + '.tsx';
 
     if (fs.existsSync(sourcePath)) {
       fs.copyFileSync(sourcePath, destPath);
-      console.log(`Copied ${sourcePath} to ${destPath}`);
+      console.log('Copied ' + sourcePath + ' to ' + destPath);
     } else if (fs.existsSync(backupPath)) {
       fs.copyFileSync(backupPath, destPath);
-      console.log(`Copied backup ${backupPath} to ${destPath}`);
+      console.log('Copied backup ' + backupPath + ' to ' + destPath);
     } else {
-      console.log(`Warning: Component ${component} not found in either source or backup`);
+      console.log('Warning: Component ' + component + ' not found in either source or backup');
     }
   });
 
@@ -84,7 +84,7 @@ function copyDir(src, dest) {
       }
     }
   } catch (error) {
-    console.error(\`Error copying directory \${src} to \${dest}:\`, error);
+    console.error('Error copying directory ' + src + ' to ' + dest + ':', error);
   }
 }
 
@@ -118,7 +118,7 @@ if (fs.existsSync('temp-components/lib')) {
 function ensureDirectoryExists(dir) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
-    console.log(`Created directory: ${dir}`);
+    console.log('Created directory: ' + dir);
   }
 }
 
