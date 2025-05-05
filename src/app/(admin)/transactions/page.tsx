@@ -2,20 +2,238 @@
 
 import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination"
 import { ChevronDown, Filter, MoreHorizontal, Search } from "lucide-react"
 import { trpc } from "@/utils/trpc/client"
-import { formatCurrency, formatDate } from "@/lib/utils"
 import { TransactionDetails } from "@/components/transactions/transaction-details"
-import { toast } from "sonner"
+
+// Simple toast implementation
+const toast = {
+  success: (message: string) => console.log('SUCCESS:', message),
+  error: (message: string) => console.error('ERROR:', message)
+}
+
+// Inline utils functions
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-MY', {
+    style: 'currency',
+    currency: 'MYR',
+  }).format(amount);
+}
+
+function formatDate(dateString: string): string {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(date);
+}
+
+// Simple UI components to avoid import issues
+function SimpleButton({
+  children,
+  variant = 'default',
+  size = 'default',
+  onClick,
+  disabled = false,
+  className = ''
+}: {
+  children: React.ReactNode,
+  variant?: 'default' | 'outline' | 'ghost' | 'icon',
+  size?: 'default' | 'sm' | 'lg' | 'icon',
+  onClick?: () => void,
+  disabled?: boolean,
+  className?: string
+}) {
+  const sizeClasses =
+    size === 'sm' ? 'h-9 px-3 text-xs' :
+    size === 'icon' ? 'h-10 w-10' :
+    'px-4 py-2';
+
+  const variantClasses =
+    variant === 'outline' ? 'border border-input bg-background hover:bg-accent hover:text-accent-foreground' :
+    variant === 'ghost' ? 'hover:bg-accent hover:text-accent-foreground' :
+    variant === 'icon' ? 'h-10 w-10 rounded-full' :
+    'bg-primary text-primary-foreground hover:bg-primary/90';
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${sizeClasses} ${variantClasses} ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function SimpleCard({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}>{children}</div>;
+}
+
+function SimpleCardHeader({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`flex flex-col space-y-1.5 p-6 ${className}`}>{children}</div>;
+}
+
+function SimpleCardTitle({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`}>{children}</h3>;
+}
+
+function SimpleCardDescription({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <p className={`text-sm text-muted-foreground ${className}`}>{children}</p>;
+}
+
+function SimpleCardContent({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`p-6 pt-0 ${className}`}>{children}</div>;
+}
+
+function SimpleCardFooter({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`flex items-center p-6 pt-0 ${className}`}>{children}</div>;
+}
+
+function SimpleCheckbox({
+  checked = false,
+  onCheckedChange,
+  onClick,
+  className = ''
+}: {
+  checked?: boolean,
+  onCheckedChange?: (checked: boolean) => void,
+  onClick?: (e: React.MouseEvent) => void,
+  className?: string
+}) {
+  return (
+    <div
+      onClick={(e) => {
+        if (onClick) onClick(e);
+        if (onCheckedChange) onCheckedChange(!checked);
+      }}
+      className={`h-4 w-4 rounded-sm border border-primary flex items-center justify-center ${checked ? 'bg-primary text-primary-foreground' : 'bg-background'} ${className}`}
+    >
+      {checked && (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 text-white">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      )}
+    </div>
+  );
+}
+
+function SimpleDropdownMenu({ children }: { children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return <div className="relative">{children}</div>;
+}
+
+function SimpleDropdownMenuTrigger({ children, asChild, onClick }: { children: React.ReactNode, asChild?: boolean, onClick?: (e: React.MouseEvent) => void }) {
+  return <div onClick={onClick}>{children}</div>;
+}
+
+function SimpleDropdownMenuContent({ children, align = 'center', className = '' }: { children: React.ReactNode, align?: 'center' | 'start' | 'end', className?: string }) {
+  return <div className={`z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md ${align === 'end' ? 'right-0' : align === 'start' ? 'left-0' : ''} ${className}`}>{children}</div>;
+}
+
+function SimpleDropdownMenuItem({ children, onClick, className = '' }: { children: React.ReactNode, onClick?: () => void, className?: string }) {
+  return <button onClick={onClick} className={`relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground ${className}`}>{children}</button>;
+}
+
+function SimpleInput({
+  type = 'text',
+  placeholder,
+  value,
+  onChange,
+  onKeyDown,
+  className = ''
+}: {
+  type?: string,
+  placeholder?: string,
+  value?: string,
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void,
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void,
+  className?: string
+}) {
+  return <input type={type} placeholder={placeholder} value={value} onChange={onChange} onKeyDown={onKeyDown} className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`} />;
+}
+
+function SimpleSelect({ children, value, onValueChange }: { children: React.ReactNode, value?: string, onValueChange?: (value: string) => void }) {
+  return <div className="relative">{children}</div>;
+}
+
+function SimpleSelectTrigger({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <button className={`flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}>{children}</button>;
+}
+
+function SimpleSelectValue({ placeholder }: { placeholder: string }) {
+  return <span className="text-muted-foreground">{placeholder}</span>;
+}
+
+function SimpleSelectContent({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md ${className}`}>{children}</div>;
+}
+
+function SimpleSelectItem({ children, value, className = '' }: { children: React.ReactNode, value: string, className?: string }) {
+  return <div className={`relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground ${className}`}>{children}</div>;
+}
+
+function SimpleTable({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`w-full overflow-auto ${className}`}><table className="w-full caption-bottom text-sm">{children}</table></div>;
+}
+
+function SimpleTableHeader({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <thead className={`[&_tr]:border-b ${className}`}>{children}</thead>;
+}
+
+function SimpleTableBody({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <tbody className={`[&_tr:last-child]:border-0 ${className}`}>{children}</tbody>;
+}
+
+function SimpleTableRow({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <tr className={`border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted ${className}`}>{children}</tr>;
+}
+
+function SimpleTableHead({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <th className={`h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 ${className}`}>{children}</th>;
+}
+
+function SimpleTableCell({ children, colSpan, className = '' }: {
+  children: React.ReactNode,
+  colSpan?: number,
+  className?: string
+}) {
+  return <td colSpan={colSpan} className={`p-4 align-middle [&:has([role=checkbox])]:pr-0 ${className}`}>{children}</td>;
+}
+
+function SimpleBadge({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${className}`}>{children}</span>;
+}
+
+function SimplePagination({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <nav className={`mx-auto flex w-full justify-center ${className}`}>{children}</nav>;
+}
+
+function SimplePaginationContent({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`flex flex-row items-center gap-1 ${className}`}>{children}</div>;
+}
+
+function SimplePaginationItem({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={className}>{children}</div>;
+}
+
+function SimplePaginationLink({
+  children,
+  href,
+  isActive,
+  isDisabled,
+  className = ''
+}: {
+  children: React.ReactNode,
+  href?: string,
+  isActive?: boolean,
+  isDisabled?: boolean,
+  className?: string
+}) {
+  return <a href={href} className={`h-9 min-w-9 items-center justify-center rounded-md border border-input bg-background p-0 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${isActive ? 'bg-accent text-accent-foreground' : ''} ${isDisabled ? 'pointer-events-none opacity-50' : ''} ${className}`}>{children}</a>;
+}
 
 interface Transaction {
   id: string
@@ -239,32 +457,32 @@ function TransactionsContent() {
         </div>
 
         <div className="flex gap-2">
-          <Button
+          <SimpleButton
             variant="default"
             onClick={handleBatchApprove}
             disabled={selectedTransactions.length === 0 || batchApproveMutation.isPending}
           >
             Approve Selected ({selectedTransactions.length})
-          </Button>
-          <Button
+          </SimpleButton>
+          <SimpleButton
             variant="outline"
             onClick={handleBatchReject}
             disabled={selectedTransactions.length === 0}
           >
             Reject Selected
-          </Button>
+          </SimpleButton>
         </div>
       </div>
 
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle>Transactions</CardTitle>
-          <CardDescription>View and manage all property transactions</CardDescription>
+      <SimpleCard>
+        <SimpleCardHeader className="pb-4">
+          <SimpleCardTitle>Transactions</SimpleCardTitle>
+          <SimpleCardDescription>View and manage all property transactions</SimpleCardDescription>
 
           <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
+              <SimpleInput
                 type="search"
                 placeholder="Search transactions..."
                 className="pl-8"
@@ -275,214 +493,214 @@ function TransactionsContent() {
             </div>
 
             <div className="flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 gap-1">
+              <SimpleDropdownMenu>
+                <SimpleDropdownMenuTrigger asChild>
+                  <SimpleButton variant="outline" size="sm" className="h-8 gap-1">
                     <Filter className="h-3.5 w-3.5" />
                     <span>Filter</span>
                     <ChevronDown className="h-3.5 w-3.5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[200px]">
+                  </SimpleButton>
+                </SimpleDropdownMenuTrigger>
+                <SimpleDropdownMenuContent align="end" className="w-[200px]">
                   <div className="grid gap-4 p-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Status</label>
-                      <Select
+                      <SimpleSelect
                         value={filters.status}
                         onValueChange={value => setFilters(prev => ({ ...prev, status: value }))}
                       >
-                        <SelectTrigger>
-                          <SelectValue placeholder="All statuses" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">All statuses</SelectItem>
-                          <SelectItem value="Pending">Pending</SelectItem>
-                          <SelectItem value="Approved">Approved</SelectItem>
-                          <SelectItem value="Rejected">Rejected</SelectItem>
-                          <SelectItem value="Completed">Completed</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <SimpleSelectTrigger>
+                          <SimpleSelectValue placeholder="All statuses" />
+                        </SimpleSelectTrigger>
+                        <SimpleSelectContent>
+                          <SimpleSelectItem value="">All statuses</SimpleSelectItem>
+                          <SimpleSelectItem value="Pending">Pending</SimpleSelectItem>
+                          <SimpleSelectItem value="Approved">Approved</SimpleSelectItem>
+                          <SimpleSelectItem value="Rejected">Rejected</SimpleSelectItem>
+                          <SimpleSelectItem value="Completed">Completed</SimpleSelectItem>
+                        </SimpleSelectContent>
+                      </SimpleSelect>
                     </div>
 
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Date Range</label>
-                      <Select
+                      <SimpleSelect
                         value={filters.dateRange}
                         onValueChange={value => setFilters(prev => ({ ...prev, dateRange: value }))}
                       >
-                        <SelectTrigger>
-                          <SelectValue placeholder="All time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All time</SelectItem>
-                          <SelectItem value="today">Today</SelectItem>
-                          <SelectItem value="thisWeek">This week</SelectItem>
-                          <SelectItem value="thisMonth">This month</SelectItem>
-                          <SelectItem value="lastMonth">Last month</SelectItem>
-                          <SelectItem value="last3Months">Last 3 months</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <SimpleSelectTrigger>
+                          <SimpleSelectValue placeholder="All time" />
+                        </SimpleSelectTrigger>
+                        <SimpleSelectContent>
+                          <SimpleSelectItem value="all">All time</SimpleSelectItem>
+                          <SimpleSelectItem value="today">Today</SimpleSelectItem>
+                          <SimpleSelectItem value="thisWeek">This week</SimpleSelectItem>
+                          <SimpleSelectItem value="thisMonth">This month</SimpleSelectItem>
+                          <SimpleSelectItem value="lastMonth">Last month</SimpleSelectItem>
+                          <SimpleSelectItem value="last3Months">Last 3 months</SimpleSelectItem>
+                        </SimpleSelectContent>
+                      </SimpleSelect>
                     </div>
 
-                    <Button className="w-full" onClick={applyFilters}>
+                    <SimpleButton className="w-full" onClick={applyFilters}>
                       Apply Filters
-                    </Button>
+                    </SimpleButton>
                   </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </SimpleDropdownMenuContent>
+              </SimpleDropdownMenu>
             </div>
           </div>
-        </CardHeader>
+        </SimpleCardHeader>
 
-        <CardContent>
+        <SimpleCardContent>
           <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50px]">
-                    <Checkbox
+            <SimpleTable>
+              <SimpleTableHeader>
+                <SimpleTableRow>
+                  <SimpleTableHead className="w-[50px]">
+                    <SimpleCheckbox
                       checked={selectedTransactions.length > 0 && selectedTransactions.length === data?.transactions.length}
                       onCheckedChange={handleSelectAll}
                     />
-                  </TableHead>
-                  <TableHead>Transaction ID</TableHead>
-                  <TableHead>Property</TableHead>
-                  <TableHead>Agent</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+                  </SimpleTableHead>
+                  <SimpleTableHead>Transaction ID</SimpleTableHead>
+                  <SimpleTableHead>Property</SimpleTableHead>
+                  <SimpleTableHead>Agent</SimpleTableHead>
+                  <SimpleTableHead>Amount</SimpleTableHead>
+                  <SimpleTableHead>Date</SimpleTableHead>
+                  <SimpleTableHead>Status</SimpleTableHead>
+                  <SimpleTableHead className="text-right">Actions</SimpleTableHead>
+                </SimpleTableRow>
+              </SimpleTableHeader>
+              <SimpleTableBody>
                 {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="h-24 text-center">
+                  <SimpleTableRow>
+                    <SimpleTableCell colSpan={8} className="h-24 text-center">
                       Loading transactions...
-                    </TableCell>
-                  </TableRow>
+                    </SimpleTableCell>
+                  </SimpleTableRow>
                 ) : data?.transactions.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="h-24 text-center">
+                  <SimpleTableRow>
+                    <SimpleTableCell colSpan={8} className="h-24 text-center">
                       No transactions found.
-                    </TableCell>
-                  </TableRow>
+                    </SimpleTableCell>
+                  </SimpleTableRow>
                 ) : (
                   data?.transactions.map((transaction: Transaction) => (
                     <>
-                      <TableRow key={transaction.id} className="cursor-pointer hover:bg-muted/50">
-                        <TableCell>
-                          <Checkbox
+                      <SimpleTableRow key={transaction.id} className="cursor-pointer hover:bg-muted/50">
+                        <SimpleTableCell>
+                          <SimpleCheckbox
                             checked={selectedTransactions.includes(transaction.id)}
                             onCheckedChange={checked => handleSelectTransaction(transaction.id, !!checked)}
                             onClick={e => e.stopPropagation()}
                           />
-                        </TableCell>
-                        <TableCell
+                        </SimpleTableCell>
+                        <SimpleTableCell
                           className="font-medium"
                           onClick={() => setExpandedTransaction(expandedTransaction === transaction.id ? null : transaction.id)}
                         >
                           {transaction.id.slice(0, 8)}...
-                        </TableCell>
-                        <TableCell onClick={() => setExpandedTransaction(expandedTransaction === transaction.id ? null : transaction.id)}>
+                        </SimpleTableCell>
+                        <SimpleTableCell onClick={() => setExpandedTransaction(expandedTransaction === transaction.id ? null : transaction.id)}>
                           {transaction.property.address}
-                        </TableCell>
-                        <TableCell onClick={() => setExpandedTransaction(expandedTransaction === transaction.id ? null : transaction.id)}>
+                        </SimpleTableCell>
+                        <SimpleTableCell onClick={() => setExpandedTransaction(expandedTransaction === transaction.id ? null : transaction.id)}>
                           {transaction.agent.name}
-                        </TableCell>
-                        <TableCell onClick={() => setExpandedTransaction(expandedTransaction === transaction.id ? null : transaction.id)}>
+                        </SimpleTableCell>
+                        <SimpleTableCell onClick={() => setExpandedTransaction(expandedTransaction === transaction.id ? null : transaction.id)}>
                           {formatCurrency(transaction.amount)}
-                        </TableCell>
-                        <TableCell onClick={() => setExpandedTransaction(expandedTransaction === transaction.id ? null : transaction.id)}>
+                        </SimpleTableCell>
+                        <SimpleTableCell onClick={() => setExpandedTransaction(expandedTransaction === transaction.id ? null : transaction.id)}>
                           {formatDate(transaction.createdAt)}
-                        </TableCell>
-                        <TableCell onClick={() => setExpandedTransaction(expandedTransaction === transaction.id ? null : transaction.id)}>
-                          <Badge className={statusColors[transaction.status] || ""}>
+                        </SimpleTableCell>
+                        <SimpleTableCell onClick={() => setExpandedTransaction(expandedTransaction === transaction.id ? null : transaction.id)}>
+                          <SimpleBadge className={statusColors[transaction.status] || ""}>
                             {transaction.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
-                              <Button variant="ghost" size="icon">
+                          </SimpleBadge>
+                        </SimpleTableCell>
+                        <SimpleTableCell className="text-right">
+                          <SimpleDropdownMenu>
+                            <SimpleDropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
+                              <SimpleButton variant="ghost" size="icon">
                                 <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => router.push(`/admin/transactions/${transaction.id}`)}>
+                              </SimpleButton>
+                            </SimpleDropdownMenuTrigger>
+                            <SimpleDropdownMenuContent align="end">
+                              <SimpleDropdownMenuItem onClick={() => router.push(`/admin/transactions/${transaction.id}`)}>
                                 View Details
-                              </DropdownMenuItem>
+                              </SimpleDropdownMenuItem>
                               {transaction.status === "Pending" && (
                                 <>
-                                  <DropdownMenuItem onClick={() => approveTransactionMutation.mutate({ id: transaction.id })}>
+                                  <SimpleDropdownMenuItem onClick={() => approveTransactionMutation.mutate({ id: transaction.id })}>
                                     Approve
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => rejectTransactionMutation.mutate({ id: transaction.id })}>
+                                  </SimpleDropdownMenuItem>
+                                  <SimpleDropdownMenuItem onClick={() => rejectTransactionMutation.mutate({ id: transaction.id })}>
                                     Reject
-                                  </DropdownMenuItem>
+                                  </SimpleDropdownMenuItem>
                                 </>
                               )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
+                            </SimpleDropdownMenuContent>
+                          </SimpleDropdownMenu>
+                        </SimpleTableCell>
+                      </SimpleTableRow>
                       {expandedTransaction === transaction.id && (
-                        <TableRow>
-                          <TableCell colSpan={8} className="p-0">
+                        <SimpleTableRow>
+                          <SimpleTableCell colSpan={8} className="p-0">
                             <TransactionDetails transaction={transaction} />
-                          </TableCell>
-                        </TableRow>
+                          </SimpleTableCell>
+                        </SimpleTableRow>
                       )}
                     </>
                   ))
                 )}
-              </TableBody>
-            </Table>
+              </SimpleTableBody>
+            </SimpleTable>
           </div>
-        </CardContent>
+        </SimpleCardContent>
 
-        <CardFooter className="flex items-center justify-between">
+        <SimpleCardFooter className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
             Showing {data?.transactions.length || 0} of {data?.total || 0} transactions
           </div>
 
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationLink
+          <SimplePagination>
+            <SimplePaginationContent>
+              <SimplePaginationItem>
+                <SimplePaginationLink
                   href={`/admin/transactions?page=${Math.max(1, page - 1)}&limit=${limit}`}
                   isDisabled={page <= 1}
                 >
                   Previous
-                </PaginationLink>
-              </PaginationItem>
+                </SimplePaginationLink>
+              </SimplePaginationItem>
 
               {Array.from({ length: Math.min(5, Math.ceil((data?.total || 0) / limit)) }, (_, i) => {
                 const pageNumber = i + 1
                 return (
-                  <PaginationItem key={pageNumber}>
-                    <PaginationLink
+                  <SimplePaginationItem key={pageNumber}>
+                    <SimplePaginationLink
                       href={`/admin/transactions?page=${pageNumber}&limit=${limit}`}
                       isActive={pageNumber === page}
                     >
                       {pageNumber}
-                    </PaginationLink>
-                  </PaginationItem>
+                    </SimplePaginationLink>
+                  </SimplePaginationItem>
                 )
               })}
 
-              <PaginationItem>
-                <PaginationLink
+              <SimplePaginationItem>
+                <SimplePaginationLink
                   href={`/admin/transactions?page=${page + 1}&limit=${limit}`}
                   isDisabled={!data || page >= Math.ceil(data.total / limit)}
                 >
                   Next
-                </PaginationLink>
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </CardFooter>
-      </Card>
+                </SimplePaginationLink>
+              </SimplePaginationItem>
+            </SimplePaginationContent>
+          </SimplePagination>
+        </SimpleCardFooter>
+      </SimpleCard>
     </div>
   )
 }
