@@ -1,11 +1,39 @@
 "use client"
 
 import Link from "next/link"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { TransactionStatusBadge } from "./transaction-status-badge"
 import { formatDistanceToNow } from "date-fns"
 import { Eye } from "lucide-react"
+
+// Simple UI components to avoid import issues
+function SimpleCard({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}>{children}</div>;
+}
+
+function SimpleCardContent({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`p-6 pt-0 ${className}`}>{children}</div>;
+}
+
+function SimpleCardFooter({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`flex items-center p-6 pt-0 ${className}`}>{children}</div>;
+}
+
+function SimpleButton({ children, variant = 'default', size = 'default', asChild, className = '' }: {
+  children: React.ReactNode,
+  variant?: 'default' | 'outline' | 'ghost',
+  size?: 'default' | 'sm' | 'lg' | 'icon',
+  asChild?: boolean,
+  className?: string
+}) {
+  const sizeClasses = size === 'sm' ? 'h-9 px-3 text-xs' : 'px-4 py-2';
+  const variantClasses = variant === 'outline' ? 'border border-input bg-background hover:bg-accent hover:text-accent-foreground' : 'bg-primary text-primary-foreground hover:bg-primary/90';
+
+  return asChild ? (
+    <div className={`inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${sizeClasses} ${variantClasses} ${className}`}>{children}</div>
+  ) : (
+    <button className={`inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${sizeClasses} ${variantClasses} ${className}`}>{children}</button>
+  );
+}
 
 interface TransactionCardProps {
   transaction: any
@@ -30,8 +58,8 @@ export function TransactionCard({ transaction, isAdmin = false }: TransactionCar
     : `/agent/transactions/${transaction.id}`
 
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-0">
+    <SimpleCard className="overflow-hidden">
+      <SimpleCardContent className="p-0">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -62,15 +90,15 @@ export function TransactionCard({ transaction, isAdmin = false }: TransactionCar
             </div>
           </div>
         </div>
-      </CardContent>
-      <CardFooter className="bg-muted/50 p-4 flex justify-end">
-        <Button asChild variant="outline" size="sm">
+      </SimpleCardContent>
+      <SimpleCardFooter className="bg-muted/50 p-4 flex justify-end">
+        <SimpleButton asChild variant="outline" size="sm">
           <Link href={viewLink}>
             <Eye className="mr-2 h-4 w-4" />
             View Details
           </Link>
-        </Button>
-      </CardFooter>
-    </Card>
+        </SimpleButton>
+      </SimpleCardFooter>
+    </SimpleCard>
   )
 }

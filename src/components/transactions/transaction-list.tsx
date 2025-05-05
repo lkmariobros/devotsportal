@@ -1,9 +1,21 @@
 "use client"
 
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
 import { TransactionCard } from "./transaction-card"
 import { PlusCircle } from "lucide-react"
+
+// Simple Button component to avoid import issues
+function SimpleButton({ children, asChild, className = '' }: {
+  children: React.ReactNode,
+  asChild?: boolean,
+  className?: string
+}) {
+  return asChild ? (
+    <div className={`inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 ${className}`}>{children}</div>
+  ) : (
+    <button className={`inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 ${className}`}>{children}</button>
+  );
+}
 
 interface TransactionListProps {
   transactions: any[]
@@ -27,12 +39,12 @@ export function TransactionList({ transactions, isAdmin = false }: TransactionLi
               : "You haven't created any transactions yet."}
           </p>
           {!isAdmin && (
-            <Button asChild>
+            <SimpleButton asChild>
               <Link href={newTransactionLink}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Create Your First Transaction
               </Link>
-            </Button>
+            </SimpleButton>
           )}
         </div>
       ) : (

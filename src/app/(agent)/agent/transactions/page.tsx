@@ -1,10 +1,29 @@
 import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { PlusCircle } from "lucide-react"
 import { getTransactions } from "@/actions/transaction-actions-clean"
 import { TransactionList } from "@/components/transactions/transaction-list"
 import { createServerSupabaseClient } from "@/utils/supabase/server"
+
+// Simple UI components to avoid import issues
+function SimpleCard({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}>{children}</div>;
+}
+
+function SimpleCardHeader({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`flex flex-col space-y-1.5 p-6 ${className}`}>{children}</div>;
+}
+
+function SimpleCardTitle({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`}>{children}</h3>;
+}
+
+function SimpleCardContent({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <div className={`p-6 pt-0 ${className}`}>{children}</div>;
+}
+
+function SimpleButton({ children, className = '' }: { children: React.ReactNode, className?: string }) {
+  return <button className={`inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 ${className}`}>{children}</button>;
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -43,21 +62,21 @@ export default async function TransactionsPage({
           Transactions
         </h1>
         <Link href="/agent/transactions/new">
-          <Button>
+          <SimpleButton>
             <PlusCircle className="mr-2 h-4 w-4" />
             New Transaction
-          </Button>
+          </SimpleButton>
         </Link>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Transactions</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <SimpleCard>
+        <SimpleCardHeader>
+          <SimpleCardTitle>Your Transactions</SimpleCardTitle>
+        </SimpleCardHeader>
+        <SimpleCardContent>
           <TransactionList transactions={transactions} />
-        </CardContent>
-      </Card>
+        </SimpleCardContent>
+      </SimpleCard>
     </div>
   )
 }
