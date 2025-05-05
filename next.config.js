@@ -34,6 +34,13 @@ const nextConfig = {
   // Force all pages to be server-side rendered
   output: 'standalone',
 
+  // Handle parentheses in folder names
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['*'],
+    },
+  },
+
   // Skip certain paths during static generation
   // This prevents build errors for pages that need dynamic data
   skipTrailingSlashRedirect: true,
