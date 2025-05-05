@@ -215,6 +215,22 @@ if (fs.existsSync('temp-components/utils/supabase')) {
   console.log('Copying Supabase client from temp location');
   ensureDirectoryExists('src/utils/supabase');
   copyDir('temp-components/utils/supabase', 'src/utils/supabase');
+
+  // Ensure the simple-client.ts file is properly copied
+  if (fs.existsSync('temp-components/utils/supabase/simple-client.ts')) {
+    fs.copyFileSync('temp-components/utils/supabase/simple-client.ts', 'src/utils/supabase/simple-client.ts');
+    console.log('Explicitly copied simple-client.ts');
+
+    // Also copy it to the agent-layout directory
+    ensureDirectoryExists('src/app/agent-layout/utils/supabase');
+    fs.copyFileSync('temp-components/utils/supabase/simple-client.ts', 'src/app/agent-layout/utils/supabase/simple-client.ts');
+    console.log('Copied simple-client.ts to agent-layout');
+
+    // Also copy it to the admin-layout directory
+    ensureDirectoryExists('src/app/admin-layout/utils/supabase');
+    fs.copyFileSync('temp-components/utils/supabase/simple-client.ts', 'src/app/admin-layout/utils/supabase/simple-client.ts');
+    console.log('Copied simple-client.ts to admin-layout');
+  }
 }
 
 // 4. Copy utils from temp location
