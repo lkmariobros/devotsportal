@@ -4,7 +4,7 @@ import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ChevronDown, Filter, MoreHorizontal, Search } from "lucide-react"
 import { trpc } from "@/utils/trpc/client"
-import { TransactionDetails } from "@/components/transactions/transaction-details"
+import { TransactionDetails } from "@/components/transactions/simple-transaction-details"
 
 // Simple toast implementation
 const toast = {
