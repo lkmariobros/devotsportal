@@ -11,7 +11,6 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
     dirs: [],
-    ignoreDuringBuilds: true,
   },
 
   // Completely disable TypeScript checking in build
@@ -41,6 +40,17 @@ const nextConfig = {
     },
   },
 
+  // Exclude problematic files from the build
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Exclude problematic files from the server build
+      config.externals = [...config.externals, {
+        '@/utils/trpc/client': 'commonjs @/utils/trpc/client',
+      }];
+    }
+    return config;
+  },
+
   // Skip certain paths during static generation
   // This prevents build errors for pages that need dynamic data
   skipTrailingSlashRedirect: true,
@@ -58,6 +68,14 @@ const nextConfig = {
         {
           source: '/debug/:path*',
           destination: '/404',
+        },
+        {
+          source: '/admin-dashboard/:path*',
+          destination: '/admin-layout',
+        },
+        {
+          source: '/admin-layout/admin-dashboard/:path*',
+          destination: '/admin-layout',
         }
       ];
     }
