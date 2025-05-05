@@ -1,17 +1,16 @@
-"use server"
-
 import { createServerSupabaseClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
 async function insertTestTransaction() {
+  "use server"
   try {
     const supabase = createServerSupabaseClient()
-    
+
     // Generate a UUID for the transaction
     const id = crypto.randomUUID()
-    
+
     // Insert directly with the exact schema structure
     const { data, error } = await supabase
       .from('property_transactions')
@@ -20,7 +19,7 @@ async function insertTestTransaction() {
           id,
           // Required fields
           transaction_date: new Date().toISOString().split('T')[0],
-          
+
           // Optional fields
           market_type: 'secondary',
           market_subcategory: 'residential',
@@ -28,40 +27,40 @@ async function insertTestTransaction() {
           primary_client_name: 'Debug Client (Server)',
           transaction_value: 500000,
           status: 'pending',
-          
+
           // Metadata
           created_at: new Date(),
           updated_at: new Date()
         }
       ])
       .select()
-    
+
     if (error) {
       console.error('Error inserting test transaction:', error)
       return { success: false, error: error.message }
     }
-    
+
     // Revalidate the transaction pages
     revalidatePath('/agent/transactions')
     revalidatePath('/admin-dashboard/transactions')
-    
+
     return { success: true, data }
   } catch (error) {
     console.error('Error in insertTestTransaction:', error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
     }
   }
 }
 
-export default async function DebugInsertSimplePage() {
-  const result = await insertTestTransaction()
-  
+export default function DebugInsertSimplePage() {
+  // We'll use the server action instead of calling it during render
+
   return (
     <div className="container py-10">
       <h1 className="text-2xl font-bold mb-6">Debug Insert Transaction (Simple)</h1>
-      
+
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Insert Test Transaction</CardTitle>
@@ -70,30 +69,20 @@ export default async function DebugInsertSimplePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {result.success ? (
-            <div className="p-4 bg-green-50 text-green-800 rounded">
-              <p>Transaction inserted successfully!</p>
-              <pre className="mt-2 bg-white p-2 rounded text-xs overflow-auto max-h-40">
-                {JSON.stringify(result.data, null, 2)}
-              </pre>
-            </div>
-          ) : (
-            <div className="p-4 bg-red-50 text-red-800 rounded">
-              <p>Error: {result.error}</p>
-            </div>
-          )}
+          <p>Click the button below to insert a test transaction.</p>
         </CardContent>
         <CardFooter>
           <form action={async () => {
-            'use server'
-            await insertTestTransaction()
+            const result = await insertTestTransaction()
+            // Revalidate this page to show the latest results
             revalidatePath('/debug-insert-simple')
+            return result
           }}>
-            <Button type="submit">Insert Another Test Transaction</Button>
+            <Button type="submit">Insert Test Transaction</Button>
           </form>
         </CardFooter>
       </Card>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Next Steps</CardTitle>
