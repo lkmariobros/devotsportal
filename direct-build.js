@@ -21,6 +21,7 @@ function copyUIComponents() {
   ensureDirectoryExists('temp-components/ui');
   ensureDirectoryExists('temp-components/lib');
   ensureDirectoryExists('temp-components/transactions');
+  ensureDirectoryExists('temp-components/utils/supabase');
 
   // Copy UI components
   const components = ['card', 'avatar', 'badge'];
@@ -127,6 +128,24 @@ export function TransactionDetails({ transaction }: { transaction: any }) {
 
   fs.writeFileSync('temp-components/transactions/transaction-details.tsx', transactionDetailsContent);
   console.log('Created simplified transaction-details component');
+
+  // Create a simplified Supabase client
+  const supabaseClientContent = `import { createClient } from '@supabase/supabase-js'
+
+// Hardcoded values for Vercel deployment
+const SUPABASE_URL = 'https://drelzxbshewqkaznwhrn.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyZWx6eGJzaGV3cWthem53aHJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUyMTg0MjgsImV4cCI6MjA2MDc5NDQyOH0.NfbfbAS4x68A39znICZK4w4G7tIgAA3BxYZkrhnVRTQ'
+
+/**
+ * Creates a Supabase client for client-side components with hardcoded values for Vercel deployment
+ */
+export function createClientSupabaseClient() {
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+}`;
+
+  fs.writeFileSync('temp-components/utils/supabase/simple-client.ts', supabaseClientContent);
+  fs.writeFileSync('temp-components/utils/supabase/client.ts', supabaseClientContent);
+  console.log('Created simplified Supabase client');
 }
 
 // 3. Create a simple prebuild script
@@ -189,6 +208,13 @@ if (fs.existsSync('temp-components/transactions')) {
   console.log('Copying transaction components from temp location');
   ensureDirectoryExists('src/components/transactions');
   copyDir('temp-components/transactions', 'src/components/transactions');
+}
+
+// 3.2 Copy Supabase client from temp location
+if (fs.existsSync('temp-components/utils/supabase')) {
+  console.log('Copying Supabase client from temp location');
+  ensureDirectoryExists('src/utils/supabase');
+  copyDir('temp-components/utils/supabase', 'src/utils/supabase');
 }
 
 // 4. Copy utils from temp location
