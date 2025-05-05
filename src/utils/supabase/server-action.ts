@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { Database } from '@/types/supabase';
-import { ENV } from '@/env';
+import { ENV } from '../../env.js';
 
 export function createServerActionSupabaseClient() {
   try {

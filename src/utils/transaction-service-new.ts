@@ -2,7 +2,7 @@
 
 import { createServerSupabaseClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { ENV } from '@/env'
+import { ENV } from '../env.js'
 
 /**
  * Get all transactions with optional filtering

@@ -1,4 +1,4 @@
-import { ENV } from '@/env'
+import { ENV } from '../env.js'
 
 /**
  * Check if debug features should be enabled
