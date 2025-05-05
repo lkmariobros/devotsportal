@@ -28,6 +28,17 @@ const nextConfig = {
     domains: ['res.cloudinary.com'],
   },
 
+  // Disable static optimization for problematic routes
+  experimental: {
+    // This ensures all pages are treated as server components by default
+    serverComponentsExternalPackages: ['@supabase/supabase-js']
+  },
+
+  // Skip certain paths during static generation
+  // This prevents build errors for pages that need dynamic data
+  skipTrailingSlashRedirect: true,
+  skipMiddlewareUrlNormalize: true,
+
   // Conditionally exclude debug pages in production
   async rewrites() {
     // Only apply in production
@@ -37,6 +48,10 @@ const nextConfig = {
           source: '/debug-:path*',
           destination: '/404',
         },
+        {
+          source: '/debug/:path*',
+          destination: '/404',
+        }
       ];
     }
     return [];

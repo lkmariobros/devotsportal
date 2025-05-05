@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -30,7 +30,7 @@ interface Transaction {
   status: string
 }
 
-export default function TransactionsPage() {
+function TransactionsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -249,7 +249,7 @@ export default function TransactionsPage() {
           <Button
             variant="outline"
             onClick={handleBatchReject}
-            disabled={selectedTransactions.length === 0 || batchRejectMutation.isPending}
+            disabled={selectedTransactions.length === 0}
           >
             Reject Selected
           </Button>
@@ -414,10 +414,10 @@ export default function TransactionsPage() {
                               </DropdownMenuItem>
                               {transaction.status === "Pending" && (
                                 <>
-                                  <DropdownMenuItem onClick={() => batchApproveMutation.mutate({ id: transaction.id })}>
+                                  <DropdownMenuItem onClick={() => approveTransactionMutation.mutate({ id: transaction.id })}>
                                     Approve
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => batchRejectMutation.mutate({ id: transaction.id })}>
+                                  <DropdownMenuItem onClick={() => rejectTransactionMutation.mutate({ id: transaction.id })}>
                                     Reject
                                   </DropdownMenuItem>
                                 </>
@@ -484,5 +484,13 @@ export default function TransactionsPage() {
         </CardFooter>
       </Card>
     </div>
+  )
+}
+
+export default function TransactionsPage() {
+  return (
+    <Suspense fallback={<div>Loading transactions...</div>}>
+      <TransactionsContent />
+    </Suspense>
   )
 }
