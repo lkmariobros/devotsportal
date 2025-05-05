@@ -3,9 +3,9 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  RiTeamLine, 
-  RiFileChartLine, 
+import {
+  RiTeamLine,
+  RiFileChartLine,
   RiMoneyDollarCircleLine,
   RiUserLine,
   RiDownloadLine
@@ -18,7 +18,23 @@ import { DateRange } from "react-day-picker";
 import { exportToCsv } from "../../../utils/export-helpers";
 import { StatsGrid } from "@/components/ui/stats-grid";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency, formatDate } from "@/lib/utils";
+// Inline utils functions
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-MY', {
+    style: 'currency',
+    currency: 'MYR',
+  }).format(amount);
+}
+
+function formatDate(dateString: string): string {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(date);
+}
 import { TransactionsChart } from "./transactions-chart";
 import { CommissionForecastChart } from "./commission-forecast-chart";
 import { AgentActivity } from "./agent-activity";
@@ -94,9 +110,9 @@ function StatsGridSkeleton() {
 }
 
 // Upcoming Payments component
-function UpcomingPayments({ data, isLoading }: { 
-  data?: TransactionData; 
-  isLoading: boolean 
+function UpcomingPayments({ data, isLoading }: {
+  data?: TransactionData;
+  isLoading: boolean
 }) {
   if (isLoading) {
     return (
@@ -128,9 +144,9 @@ function UpcomingPayments({ data, isLoading }: {
 }
 
 // Commission Status component
-function CommissionStatus({ data, isLoading }: { 
-  data?: CommissionForecastProps["data"]; 
-  isLoading: boolean 
+function CommissionStatus({ data, isLoading }: {
+  data?: CommissionForecastProps["data"];
+  isLoading: boolean
 }) {
   if (isLoading) {
     return <Skeleton className="h-40 w-full" />;
@@ -152,7 +168,7 @@ function CommissionStatus({ data, isLoading }: {
           </div>
         </div>
       </div>
-      
+
       <div className="space-y-1">
         <div className="text-sm text-muted-foreground">Monthly Average</div>
         <div className="text-xl font-semibold">
@@ -164,12 +180,12 @@ function CommissionStatus({ data, isLoading }: {
 }
 
 // Dashboard Stats component
-function DashboardStats({ 
-  agentsData, 
-  dashboardData 
-}: { 
-  agentsData?: AgentData; 
-  dashboardData?: TransactionData 
+function DashboardStats({
+  agentsData,
+  dashboardData
+}: {
+  agentsData?: AgentData;
+  dashboardData?: TransactionData
 }) {
   // Calculate pending commissions
   const pendingCommissions = useMemo(() => {
@@ -184,8 +200,8 @@ function DashboardStats({
       {
         title: "Total Agents",
         value: agentsData?.totalCount || 0,
-        change: { 
-          value: (agentsData as any)?.agentChange ? `${(agentsData as any).agentChange.toFixed(1)}%` : "0%", 
+        change: {
+          value: (agentsData as any)?.agentChange ? `${(agentsData as any).agentChange.toFixed(1)}%` : "0%",
           trend: (agentsData as any)?.agentChange > 0 ? "up" : "down",
           isPositive: (agentsData as any)?.agentChange > 0
         },
@@ -194,19 +210,19 @@ function DashboardStats({
       {
         title: "Active Transactions",
         value: dashboardData?.transactionCounts?.active || 0,
-        change: { 
-          value: `${((dashboardData?.transactionCounts?.active || 0) / 
-                  (dashboardData?.transactionCounts?.completed || 1) * 100).toFixed(1)}%`, 
-          trend: "up", 
-          isPositive: true 
+        change: {
+          value: `${((dashboardData?.transactionCounts?.active || 0) /
+                  (dashboardData?.transactionCounts?.completed || 1) * 100).toFixed(1)}%`,
+          trend: "up",
+          isPositive: true
         },
         icon: <RiFileChartLine className="h-5 w-5" />
       },
       {
         title: "Monthly Revenue",
         value: formatCurrency(dashboardData?.revenue || 0),
-        change: { 
-          value: (dashboardData as any)?.revenueChange !== undefined ? `${(dashboardData as any).revenueChange.toFixed(1)}%` : "0%", 
+        change: {
+          value: (dashboardData as any)?.revenueChange !== undefined ? `${(dashboardData as any).revenueChange.toFixed(1)}%` : "0%",
           trend: (dashboardData as any)?.revenueChange > 0 ? "up" : "down",
           isPositive: (dashboardData as any)?.revenueChange > 0
         },
@@ -215,8 +231,8 @@ function DashboardStats({
       {
         title: "Pending Commissions",
         value: formatCurrency(pendingCommissions),
-        change: { 
-          value: (dashboardData as any)?.commissionChange ? `${(dashboardData as any).commissionChange.toFixed(1)}%` : "0%", 
+        change: {
+          value: (dashboardData as any)?.commissionChange ? `${(dashboardData as any).commissionChange.toFixed(1)}%` : "0%",
           trend: (dashboardData as any)?.commissionChange > 0 ? "up" : "down",
           isPositive: (dashboardData as any)?.commissionChange > 0
         },
@@ -229,7 +245,7 @@ function DashboardStats({
 export default function AdminDashboardPage() {
   // State for date range picker
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  
+
   // Fetch dashboard summary data with date range
   const { data: dashboardData, isLoading: isDashboardLoading } = trpc.transactions.getDashboardSummary.useQuery(
     dateRange ? {
@@ -241,7 +257,7 @@ export default function AdminDashboardPage() {
       staleTime: 5 * 60 * 1000, // 5 minutes
     }
   );
-  
+
   // Fetch commission forecast data with date range
   const { data: commissionForecast, isLoading: isCommissionLoading } = trpc.transactions.getCommissionForecast.useQuery(
     {
@@ -253,9 +269,9 @@ export default function AdminDashboardPage() {
       staleTime: 5 * 60 * 1000, // 5 minutes
     }
   );
-  
+
   // Get agent count with change percentage
-  const { data: agentsData, isLoading: isAgentsLoading } = 
+  const { data: agentsData, isLoading: isAgentsLoading } =
     trpc.users.getAgents.useQuery({
       search: "",
       status: "",
@@ -267,7 +283,7 @@ export default function AdminDashboardPage() {
       // Add staleTime to reduce unnecessary refetches
       staleTime: 5 * 60 * 1000, // 5 minutes
     });
-    
+
   // Calculate pending commissions total - moved to the DashboardStats component
   const pendingCommissions = useMemo(() => {
     return dashboardData?.upcomingPayments?.reduce(
@@ -279,10 +295,10 @@ export default function AdminDashboardPage() {
   // Enhanced export function with different data types
   function handleExportData(type: 'summary' | 'commissions' | 'all' = 'all') {
     if (!dashboardData && !commissionForecast) return
-    
+
     let exportData: Record<string, any> = {}
     let filename = `dashboard-export-${new Date().toISOString().split('T')[0]}`
-    
+
     if (type === 'all' || type === 'summary') {
       exportData.summary = {
         agents: agentsData?.totalCount || 0,
@@ -292,19 +308,19 @@ export default function AdminDashboardPage() {
         pendingCommissions: pendingCommissions || 0
       }
     }
-    
+
     if (type === 'all' || type === 'commissions') {
       exportData.commissions = {
         historical: commissionForecast?.historical || [],
         forecast: commissionForecast?.forecast || [],
         summary: commissionForecast?.summary || {}
       }
-      
+
       if (type === 'commissions') {
         filename = `commission-forecast-${new Date().toISOString().split('T')[0]}`
       }
     }
-    
+
     exportToCsv(exportData, `${filename}.csv`)
   }
 
@@ -325,12 +341,12 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       </div>
-      
+
       {/* Stats Grid with Suspense for better loading UX */}
       {isDashboardLoading || isAgentsLoading ? (
         <StatsGridSkeleton />
       ) : (
-        <DashboardStats 
+        <DashboardStats
           agentsData={typedAgentsData}
           dashboardData={dashboardData}
         />
@@ -343,28 +359,28 @@ export default function AdminDashboardPage() {
           <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="overview" className="space-y-4">
           {/* Charts with Suspense for better loading UX */}
           <div className="grid gap-8 md:grid-cols-2">
             <Suspense fallback={<Skeleton className="h-[400px]" />}>
-              <CommissionForecastChart 
-                data={commissionForecast} 
-                isLoading={isCommissionLoading} 
-                filter="all" 
+              <CommissionForecastChart
+                data={commissionForecast}
+                isLoading={isCommissionLoading}
+                filter="all"
               />
             </Suspense>
             <Suspense fallback={<Skeleton className="h-[400px]" />}>
               <TransactionsChart />
             </Suspense>
           </div>
-          
+
           {/* Add Agent Activity component */}
           <Suspense fallback={<Skeleton className="h-[400px]" />}>
             <AgentActivity />
           </Suspense>
         </TabsContent>
-        
+
         <TabsContent value="analytics" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
@@ -373,28 +389,28 @@ export default function AdminDashboardPage() {
                 <CardDescription>Overview of commission payments</CardDescription>
               </CardHeader>
               <CardContent>
-                <CommissionStatus 
-                  data={commissionForecast} 
-                  isLoading={isCommissionLoading} 
+                <CommissionStatus
+                  data={commissionForecast}
+                  isLoading={isCommissionLoading}
                 />
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Upcoming Payments</CardTitle>
                 <CardDescription>Scheduled commission payments</CardDescription>
               </CardHeader>
               <CardContent>
-                <UpcomingPayments 
-                  data={dashboardData} 
-                  isLoading={isDashboardLoading} 
+                <UpcomingPayments
+                  data={dashboardData}
+                  isLoading={isDashboardLoading}
                 />
               </CardContent>
             </Card>
           </div>
         </TabsContent>
-        
+
         <TabsContent value="reports">
           <Card>
             <CardHeader>
@@ -408,7 +424,7 @@ export default function AdminDashboardPage() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="notifications">
           <Card>
             <CardHeader>

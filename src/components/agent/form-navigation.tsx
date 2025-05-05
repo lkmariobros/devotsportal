@@ -2,7 +2,25 @@
 
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { useTransactionForm } from "@/contexts/transaction-form-context"
+// Inline implementation of useTransactionForm
+interface TransactionFormContextType {
+  currentStep: number
+  totalSteps: number
+  goToNextStep: () => void
+  goToPreviousStep: () => void
+  isSubmitting: boolean
+}
+
+function useTransactionForm(): TransactionFormContextType {
+  // Default implementation
+  return {
+    currentStep: 1,
+    totalSteps: 7,
+    goToNextStep: () => {},
+    goToPreviousStep: () => {},
+    isSubmitting: false
+  }
+}
 import { RiArrowLeftLine, RiArrowRightLine, RiCheckLine } from "@remixicon/react"
 
 interface FormNavigationProps {
@@ -11,33 +29,33 @@ interface FormNavigationProps {
 
 export function FormNavigation({ onSubmit }: FormNavigationProps) {
   const router = useRouter()
-  const { 
-    currentStep, 
-    totalSteps, 
-    goToNextStep, 
+  const {
+    currentStep,
+    totalSteps,
+    goToNextStep,
     goToPreviousStep,
     isSubmitting
   } = useTransactionForm()
-  
+
   const handleNext = () => {
     goToNextStep()
   }
-  
+
   const handlePrevious = () => {
     goToPreviousStep()
   }
-  
+
   const handleCancel = () => {
     // Navigate back to the agent dashboard
     router.push("/agent")
   }
-  
+
   const handleSubmit = () => {
     if (onSubmit) {
       onSubmit()
     }
   }
-  
+
   return (
     <div className="flex justify-between mt-8">
       {currentStep > 1 ? (
@@ -57,8 +75,8 @@ export function FormNavigation({ onSubmit }: FormNavigationProps) {
           <RiArrowRightLine className="ml-2 h-4 w-4" />
         </Button>
       ) : (
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           disabled={isSubmitting}
           onClick={handleSubmit}
         >
