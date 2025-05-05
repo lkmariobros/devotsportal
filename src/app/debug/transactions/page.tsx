@@ -1,5 +1,5 @@
 import { createServerSupabaseClient } from "@/utils/supabase/server"
-import { NODE_ENV, SUPABASE_URL } from "../../env-config.js"
+import { NODE_ENV, SUPABASE_URL } from "../../../env-config.js"
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
