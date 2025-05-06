@@ -1,11 +1,19 @@
 import { LoginDialog } from "@/components/auth/login-dialog";
 import { SignUpDialog } from "@/components/auth/signup-dialog";
 import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/utils/supabase/server";
-import { isUserAdmin } from "@/utils/supabase/server";
+import { createClientSupabaseClient } from "@/utils/supabase/simple-client";
+
+// Helper function to check if user is admin
+async function isUserAdmin(email: string) {
+  const adminEmails = [
+    'elson@devots.com.my',
+    'josephkwantum@gmail.com'
+  ];
+  return adminEmails.includes(email.toLowerCase());
+}
 
 async function getUser() {
-  const supabase = createServerSupabaseClient();
+  const supabase = createClientSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   return user;
 }
@@ -17,7 +25,7 @@ export default async function Home() {
   // If user is logged in, check role and redirect accordingly
   if (user) {
     // Check if user is admin
-    const isAdmin = await isUserAdmin();
+    const isAdmin = await isUserAdmin(user.email || '');
 
     if (isAdmin) {
       // Redirect admin users to admin dashboard

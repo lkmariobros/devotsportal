@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClientSupabaseClient } from "@/utils/supabase/simple-client";
 
 interface LoginDialogProps {
   onSuccess?: () => void;
@@ -26,10 +26,12 @@ export function LoginDialog({ onSuccess }: LoginDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage(null); // Clear any previous errors
 
     try {
       // Get form data
@@ -37,8 +39,14 @@ export function LoginDialog({ onSuccess }: LoginDialogProps) {
       const email = formData.get('email') as string;
       const password = formData.get('password') as string;
 
-      // Create Supabase client
-      const supabase = createClientComponentClient();
+      if (!email || !password) {
+        setErrorMessage('Please enter both email and password');
+        setIsLoading(false);
+        return;
+      }
+
+      // Create Supabase client with hardcoded credentials for Vercel deployment
+      const supabase = createClientSupabaseClient();
 
       // Sign in with email and password
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -48,7 +56,7 @@ export function LoginDialog({ onSuccess }: LoginDialogProps) {
 
       if (error) {
         console.error('Login error:', error.message);
-        // Handle login error
+        setErrorMessage(error.message || 'Failed to sign in. Please check your credentials.');
         setIsLoading(false);
         return;
       }
@@ -78,6 +86,7 @@ export function LoginDialog({ onSuccess }: LoginDialogProps) {
       }
     } catch (error) {
       console.error('Login error:', error);
+      setErrorMessage('An unexpected error occurred. Please try again.');
       setIsLoading(false);
 
       // Fallback for development mode
@@ -122,12 +131,13 @@ export function LoginDialog({ onSuccess }: LoginDialogProps) {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor={`${id}-email`}>Email</Label>
-              <Input id={`${id}-email`} placeholder="hi@yourcompany.com" type="email" required />
+              <Input id={`${id}-email`} name="email" placeholder="hi@yourcompany.com" type="email" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor={`${id}-password`}>Password</Label>
               <Input
                 id={`${id}-password`}
+                name="password"
                 placeholder="Enter your password"
                 type="password"
                 required
@@ -145,6 +155,11 @@ export function LoginDialog({ onSuccess }: LoginDialogProps) {
               Forgot password?
             </a>
           </div>
+          {errorMessage && (
+            <div className="p-3 text-sm text-white bg-destructive rounded-md">
+              {errorMessage}
+            </div>
+          )}
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Signing in..." : "Sign in"}
           </Button>

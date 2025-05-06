@@ -31,8 +31,9 @@ const nextConfig = {
       '@': path.join(process.cwd(), 'src'),
       '@/utils/trpc/client': path.join(process.cwd(), 'src/utils/trpc/client.js'),
       '@/components/ui': path.join(process.cwd(), 'src/components/ui'),
-      '@supabase/auth-helpers-nextjs': path.join(process.cwd(), 'src/utils/supabase/mock-client.js'),
-      '@supabase/supabase-js': path.join(process.cwd(), 'src/utils/supabase/mock-client.js'),
+      // Use real Supabase clients instead of mocks
+      // '@supabase/auth-helpers-nextjs': path.join(process.cwd(), 'src/utils/supabase/mock-client.js'),
+      // '@supabase/supabase-js': path.join(process.cwd(), 'src/utils/supabase/mock-client.js'),
     };
 
     // Add fallbacks for problematic modules
