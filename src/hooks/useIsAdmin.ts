@@ -14,9 +14,7 @@ export function useIsAdmin() {
     async function checkAdminStatus() {
       try {
         // For development purposes, you can set this to true to bypass Supabase auth
-        const bypassAuth = true;
-
-        if (bypassAuth) {
+        if (process.env.NODE_ENV === 'development') {
           console.log("Bypassing auth for development");
           setIsAdmin(true);
           setUserEmail("dev@example.com");
@@ -24,7 +22,7 @@ export function useIsAdmin() {
           return;
         }
 
-        // This code will run in production when bypassAuth is false
+        // Production code
         const supabase = createClientComponentClient();
         const { data: { user }, error } = await supabase.auth.getUser();
 
@@ -37,11 +35,24 @@ export function useIsAdmin() {
 
         setUserEmail(user.email || null);
 
-        // Check if user email is in the admin list
+        // Primary check: Look for role in profiles table
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        if (profile && profile.role === 'admin') {
+          setIsAdmin(true);
+          setIsLoading(false);
+          return;
+        }
+
+        // Fallback check: Check if user email is in the admin list
         const adminEmails = [
-          'admin@example.com',
-          'admin@devots.com',
-          // Add your email here when you're ready
+          'elson@devots.com.my',
+          'josephkwantum@gmail.com'
+          // This list should match the server-side list
         ];
 
         const isUserAdmin = adminEmails.includes(user.email?.toLowerCase() || '');

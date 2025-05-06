@@ -2,6 +2,11 @@
 
 // Mock Supabase client for build-time
 export const createClientComponentClient = () => {
+  // Determine if we should mock an admin user
+  const isAdmin = process.env.MOCK_ADMIN_USER === 'true';
+  const mockEmail = isAdmin ? 'admin@example.com' : 'agent@example.com';
+  const mockRole = isAdmin ? 'admin' : 'agent';
+
   return {
     auth: {
       getSession: async () => ({
@@ -9,8 +14,8 @@ export const createClientComponentClient = () => {
           session: {
             user: {
               id: 'mock-user-id',
-              email: 'mock@example.com',
-              role: 'authenticated'
+              email: mockEmail,
+              role: mockRole
             }
           }
         },
@@ -20,23 +25,31 @@ export const createClientComponentClient = () => {
         data: {
           user: {
             id: 'mock-user-id',
-            email: 'mock@example.com',
-            role: 'authenticated'
+            email: mockEmail,
+            role: mockRole
           }
         },
         error: null
       }),
       signOut: async () => ({ error: null }),
-      signInWithPassword: async () => ({
-        data: {
-          user: {
-            id: 'mock-user-id',
-            email: 'mock@example.com',
-            role: 'authenticated'
-          }
-        },
-        error: null
-      }),
+      signInWithPassword: async (credentials) => {
+        // Check if the email is an admin email
+        const adminEmails = ['elson@devots.com.my', 'josephkwantum@gmail.com'];
+        const isAdmin = adminEmails.includes(credentials?.email?.toLowerCase() || '');
+        const mockEmail = credentials?.email || 'mock@example.com';
+        const mockRole = isAdmin ? 'admin' : 'agent';
+
+        return {
+          data: {
+            user: {
+              id: 'mock-user-id',
+              email: mockEmail,
+              role: mockRole
+            }
+          },
+          error: null
+        };
+      },
       onAuthStateChange: () => ({ data: {}, error: null, unsubscribe: () => {} })
     },
     from: (table) => ({

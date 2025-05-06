@@ -326,6 +326,15 @@ if (fs.existsSync('src/app/admin-layout/transactions/page-simplified.tsx')) {
   fs.copyFileSync('src/app/admin-layout/transactions/page-simplified.tsx', 'src/app/admin-layout/transactions/page.tsx');
 }
 
+// Simplified agent dashboard page
+if (fs.existsSync('src/app/agent-layout/agent/dashboard/page-simplified.tsx')) {
+  console.log('Using simplified agent dashboard page');
+  if (fs.existsSync('src/app/agent-layout/agent/dashboard/page.tsx')) {
+    fs.copyFileSync('src/app/agent-layout/agent/dashboard/page.tsx', 'src/app/agent-layout/agent/dashboard/page.tsx.backup');
+  }
+  fs.copyFileSync('src/app/agent-layout/agent/dashboard/page-simplified.tsx', 'src/app/agent-layout/agent/dashboard/page.tsx');
+}
+
 // 7. Create a Vercel-specific Next.js config
 const vercelNextConfig = `const path = require('path');
 
@@ -474,5 +483,11 @@ try {
   if (fs.existsSync('src/app/admin-layout/transactions/page.tsx.backup')) {
     fs.copyFileSync('src/app/admin-layout/transactions/page.tsx.backup', 'src/app/admin-layout/transactions/page.tsx');
     fs.unlinkSync('src/app/admin-layout/transactions/page.tsx.backup');
+  }
+
+  // Restore agent dashboard page
+  if (fs.existsSync('src/app/agent-layout/agent/dashboard/page.tsx.backup')) {
+    fs.copyFileSync('src/app/agent-layout/agent/dashboard/page.tsx.backup', 'src/app/agent-layout/agent/dashboard/page.tsx');
+    fs.unlinkSync('src/app/agent-layout/agent/dashboard/page.tsx.backup');
   }
 }

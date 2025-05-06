@@ -27,19 +27,30 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(redirectUrl)
       }
 
-      // Check if user is an admin - this is where you'd implement your admin check
-      // For now, we'll use a simple email check
-      const adminEmails = [
-        'admin@example.com',
-        'admin@devots.com',
-        // Add your email here when you're ready
-      ]
+      // Check if user is an admin
+      // First check the profile role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
 
-      const isAdmin = adminEmails.includes(user.email?.toLowerCase() || '')
+      let isAdmin = profile && profile.role === 'admin'
 
-      // If user is not an admin, redirect to dashboard
+      // If not admin by role, check the email list as fallback
       if (!isAdmin) {
-        return NextResponse.redirect(new URL('/agent-layout/dashboard', request.url))
+        const adminEmails = [
+          'elson@devots.com.my',
+          'josephkwantum@gmail.com'
+          // This list should match the server-side list
+        ]
+
+        isAdmin = adminEmails.includes(user.email?.toLowerCase() || '')
+      }
+
+      // If user is not an admin, redirect to agent dashboard
+      if (!isAdmin) {
+        return NextResponse.redirect(new URL('/agent-layout/agent/dashboard', request.url))
       }
     }
   }
@@ -47,16 +58,8 @@ export async function middleware(request: NextRequest) {
   return res
 }
 
-// Specify which routes this middleware should run on
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
-}
+// Import the matcher configuration from middleware.config.ts
+import { config } from './middleware.config';
+
+// Export the config for Next.js to use
+export { config };

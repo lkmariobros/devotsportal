@@ -68,6 +68,30 @@ const nextConfig = {
 
   // Disable static generation
   staticPageGenerationTimeout: 1,
+
+  // Add rewrites for route normalization
+  async rewrites() {
+    return [
+      // Agent portal rewrites
+      { source: '/agent', destination: '/agent-layout/agent/dashboard' },
+      { source: '/agent/dashboard', destination: '/agent-layout/agent/dashboard' },
+      { source: '/agent-layout/dashboard', destination: '/agent-layout/agent/dashboard' },
+      { source: '/agent/transactions', destination: '/agent-layout/agent/transactions' },
+      { source: '/agent/transactions/:path*', destination: '/agent-layout/agent/transactions/:path*' },
+      { source: '/agent/clients', destination: '/agent-layout/agent/clients' },
+      { source: '/agent/profile', destination: '/agent-layout/agent/profile' },
+
+      // Admin portal rewrites
+      { source: '/admin', destination: '/admin-layout/admin-dashboard' },
+      { source: '/admin/dashboard', destination: '/admin-layout/admin-dashboard' },
+      { source: '/admin-layout/dashboard', destination: '/admin-layout/admin-dashboard' },
+      { source: '/admin/transactions', destination: '/admin-layout/admin-dashboard/transactions' },
+      { source: '/admin/transactions/:path*', destination: '/admin-layout/admin-dashboard/transactions/:path*' },
+      { source: '/admin/agents', destination: '/admin-layout/admin-dashboard/agents' },
+      { source: '/admin/commission', destination: '/admin-layout/admin-dashboard/commission' },
+      { source: '/admin/commission-details', destination: '/admin-layout/admin-dashboard/commission-details' },
+    ];
+  },
 };
 
 module.exports = nextConfig;

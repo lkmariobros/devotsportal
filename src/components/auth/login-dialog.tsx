@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 interface LoginDialogProps {
   onSuccess?: () => void;
@@ -30,18 +31,61 @@ export function LoginDialog({ onSuccess }: LoginDialogProps) {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login process
-    setTimeout(() => {
+    try {
+      // Get form data
+      const formData = new FormData(e.target as HTMLFormElement);
+      const email = formData.get('email') as string;
+      const password = formData.get('password') as string;
+
+      // Create Supabase client
+      const supabase = createClientComponentClient();
+
+      // Sign in with email and password
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error('Login error:', error.message);
+        // Handle login error
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if user is admin
+      const adminEmails = [
+        'elson@devots.com.my',
+        'josephkwantum@gmail.com'
+        // Add other admin emails here only if absolutely necessary
+      ];
+
+      const isAdmin = adminEmails.includes(email.toLowerCase());
+
+      // Close dialog
       setIsLoading(false);
       setOpen(false);
 
-      // Navigate to dashboard or call success callback
+      // Navigate based on user role
       if (onSuccess) {
         onSuccess();
+      } else if (isAdmin) {
+        // Redirect admin to admin dashboard
+        router.push("/admin-layout/admin-dashboard");
       } else {
-        router.push("/agent-layout/dashboard");
+        // Redirect regular users to agent dashboard
+        router.push("/agent-layout/agent/dashboard");
       }
-    }, 1000);
+    } catch (error) {
+      console.error('Login error:', error);
+      setIsLoading(false);
+
+      // Fallback for development mode
+      if (process.env.NODE_ENV === 'development') {
+        setOpen(false);
+        router.push("/agent-layout/agent/dashboard");
+      }
+    }
   };
 
   return (

@@ -37,11 +37,23 @@ export async function isUserAdmin() {
       return false;
     }
 
-    // Check if user email is in the admin list
+    // Primary check: Look for role in profiles table
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profile && profile.role === 'admin') {
+      return true;
+    }
+
+    // Fallback check: Check if user email is in the admin list
+    // This maintains compatibility with existing code
     const adminEmails = [
-      'admin@example.com',
-      'admin@devots.com',
-      // Add your email here when you're ready
+      'elson@devots.com.my',
+      'josephkwantum@gmail.com'
+      // Add any other admin emails here only if absolutely necessary
     ];
 
     return adminEmails.includes(user.email?.toLowerCase() || '');

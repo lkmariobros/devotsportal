@@ -31,6 +31,7 @@ import {
   RiLeafLine,
   RiLogoutBoxLine,
   RiArrowDownSLine,
+  RiUserSettingsLine,
 } from "@remixicon/react";
 import { useRouter, usePathname } from "next/navigation";
 import { createClientSupabaseClient } from "@/utils/supabase/client";
@@ -78,6 +79,11 @@ const adminNavData = {
     {
       title: "Other",
       items: [
+        {
+          title: "Admin Management",
+          url: "/admin-layout/admin-dashboard/manage-admins",
+          icon: RiUserSettingsLine,
+        },
         {
           title: "Settings",
           url: "/admin/settings",

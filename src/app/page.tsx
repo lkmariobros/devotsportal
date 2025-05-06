@@ -2,6 +2,7 @@ import { LoginDialog } from "@/components/auth/login-dialog";
 import { SignUpDialog } from "@/components/auth/signup-dialog";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/utils/supabase/server";
+import { isUserAdmin } from "@/utils/supabase/server";
 
 async function getUser() {
   const supabase = createServerSupabaseClient();
@@ -13,9 +14,18 @@ export default async function Home() {
   // Check if user is logged in
   const user = await getUser();
 
-  // If user is logged in, redirect to agent dashboard
+  // If user is logged in, check role and redirect accordingly
   if (user) {
-    redirect('/agent-layout/agent');
+    // Check if user is admin
+    const isAdmin = await isUserAdmin();
+
+    if (isAdmin) {
+      // Redirect admin users to admin dashboard
+      redirect('/admin-layout/admin-dashboard');
+    } else {
+      // Redirect regular users to agent dashboard
+      redirect('/agent-layout/agent/dashboard');
+    }
   }
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">

@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useId } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 interface AuthDialogsProps {
   initialView?: "login" | "signup";
@@ -163,16 +164,63 @@ function LoginFormContent({ onClose }: FormContentProps) {
   const id = useId();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login
-    setTimeout(() => {
+    try {
+      // Get form data
+      const formData = new FormData(e.target as HTMLFormElement);
+      const email = formData.get('email') as string;
+      const password = formData.get('password') as string;
+
+      // Create Supabase client
+      const supabase = createClientComponentClient();
+
+      // Sign in with email and password
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error('Login error:', error.message);
+        // Handle login error
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if user is admin
+      const adminEmails = [
+        'elson@devots.com.my',
+        'josephkwantum@gmail.com'
+        // Add other admin emails here only if absolutely necessary
+      ];
+
+      const isAdmin = adminEmails.includes(email.toLowerCase());
+
+      // Close dialog
       setIsLoading(false);
       onClose();
-      window.location.href = "/agent-layout/dashboard";
-    }, 1000);
+
+      // Navigate based on user role
+      if (isAdmin) {
+        // Redirect admin to admin dashboard
+        window.location.href = "/admin-layout/admin-dashboard";
+      } else {
+        // Redirect regular users to agent dashboard
+        window.location.href = "/agent-layout/agent/dashboard";
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setIsLoading(false);
+
+      // Fallback for development mode
+      if (process.env.NODE_ENV === 'development') {
+        onClose();
+        window.location.href = "/agent-layout/agent/dashboard";
+      }
+    }
   };
 
   return (
