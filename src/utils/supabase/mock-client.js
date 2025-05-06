@@ -1,7 +1,13 @@
 "use client";
 
-// Mock Supabase client for build-time
-export const createClientComponentClient = () => {
+// Export all required functions
+export const createClient = () => createMockClient();
+export const createClientComponentClient = () => createMockClient();
+export const createServerComponentClient = () => createMockClient();
+export const createRouteHandlerClient = () => createMockClient();
+
+// Helper function to create a consistent mock client
+function createMockClient() {
   // Determine if we should mock an admin user
   const isAdmin = process.env.MOCK_ADMIN_USER === 'true';
   const mockEmail = isAdmin ? 'admin@example.com' : 'agent@example.com';
@@ -79,12 +85,15 @@ export const createClientComponentClient = () => {
       update: () => ({ data: {}, error: null }),
       delete: () => ({ data: {}, error: null })
     }),
-    rpc: () => ({ data: {}, error: null })
+    rpc: () => ({ data: {}, error: null }),
+    storage: {
+      from: () => ({
+        upload: async () => ({ data: { path: 'mock-path' }, error: null }),
+        getPublicUrl: () => ({ data: { publicUrl: 'https://mock-url.com/image.jpg' } }),
+      }),
+    },
   };
 };
 
-// Mock for server component client
-export const createServerComponentClient = () => createClientComponentClient();
-
 // Default export for compatibility
-export default { createClientComponentClient, createServerComponentClient };
+export default { createClient, createClientComponentClient, createServerComponentClient, createRouteHandlerClient };
