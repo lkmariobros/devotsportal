@@ -3,8 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createClientSupabaseClient } from "@/utils/supabase/simple-client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 // Helper function to check if user is admin
@@ -23,29 +22,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Check if user is already logged in on page load
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const supabase = createClientSupabaseClient();
-        const { data } = await supabase.auth.getSession();
-
-        if (data.session) {
-          console.log('User already has a session');
-          const userEmail = data.session.user.email || '';
-          const isAdmin = isUserAdmin(userEmail);
-          const redirectPath = isAdmin ? '/admin-layout/admin-dashboard' : '/agent-layout/agent/dashboard';
-          window.location.href = redirectPath;
-        } else {
-          console.log('No active session found');
-        }
-      } catch (error) {
-        console.error('Error checking session:', error);
-      }
-    };
-
-    checkSession();
-  }, []);
+  // We'll skip the session check for now to focus on the login functionality
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,24 +37,32 @@ export default function Home() {
         return;
       }
 
-      // Create Supabase client with hardcoded credentials for Vercel deployment
-      const supabase = createClientSupabaseClient();
-      console.log('Supabase client created');
-
-      // Sign in with email and password
+      // Direct API call to Supabase for authentication
       console.log('Attempting to sign in with:', { email });
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      console.log('Sign in response:', { data: data ? 'exists' : 'null', error: error ? error.message : 'none' });
 
-      if (error) {
-        console.error('Login error:', error.message);
-        setErrorMessage(error.message || 'Failed to sign in. Please check your credentials.');
-        setIsLoading(false);
-        return;
-      }
+      const SUPABASE_URL = 'https://drelzxbshewqkaznwhrn.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyZWx6eGJzaGV3cWthem53aHJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUyMTg0MjgsImV4cCI6MjA2MDc5NDQyOH0.NfbfbAS4x68A39znICZK4w4G7tIgAA3BxYZkrhnVRTQ';
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+        console.log('Sign in response:', data);
+
+        if (!response.ok) {
+          console.error('Login error:', data.error || 'Authentication failed');
+          setErrorMessage(data.error_description || 'Failed to sign in. Please check your credentials.');
+          setIsLoading(false);
+          return;
+        }
 
       // Check if user is admin
       const isAdmin = isUserAdmin(email.toLowerCase());
