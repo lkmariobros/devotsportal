@@ -3,14 +3,14 @@ const path = require('path');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  
+
   // Completely disable TypeScript and ESLint checks
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
-  
+
   // Disable static generation
   staticPageGenerationTimeout: 1,
-  
+
   // Configure image domains
   images: {
     domains: ['res.cloudinary.com', 'cloudinary.com'],
@@ -22,7 +22,7 @@ const nextConfig = {
       },
     ],
   },
-  
+
   // Critical: Enhanced webpack configuration for Vercel
   webpack: (config, { isServer }) => {
     // Add explicit module resolution
@@ -34,7 +34,7 @@ const nextConfig = {
       '@supabase/auth-helpers-nextjs': path.join(process.cwd(), 'src/utils/supabase/mock-client.js'),
       '@supabase/supabase-js': path.join(process.cwd(), 'src/utils/supabase/mock-client.js'),
     };
-    
+
     // Add fallbacks for problematic modules
     if (!isServer) {
       config.resolve.fallback = {
@@ -43,7 +43,7 @@ const nextConfig = {
         path: false,
       };
     }
-    
+
     // Handle specific problematic imports in server context
     if (isServer) {
       config.externals = [
@@ -53,19 +53,19 @@ const nextConfig = {
         },
       ];
     }
-    
+
     return config;
   },
-  
+
   // Experimental features
   experimental: {
     // Enable server actions
     serverActions: { allowedOrigins: ['*'] },
   },
-  
+
   // External packages that should be treated as server-only
   serverExternalPackages: ['@supabase/supabase-js'],
-  
+
   // Disable static generation
   staticPageGenerationTimeout: 1,
 };

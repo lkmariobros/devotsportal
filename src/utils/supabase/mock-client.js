@@ -4,36 +4,36 @@
 export const createClientComponentClient = () => {
   return {
     auth: {
-      getSession: async () => ({ 
-        data: { 
-          session: { 
-            user: { 
+      getSession: async () => ({
+        data: {
+          session: {
+            user: {
               id: 'mock-user-id',
               email: 'mock@example.com',
               role: 'authenticated'
-            } 
-          } 
+            }
+          }
         },
         error: null
       }),
-      getUser: async () => ({ 
-        data: { 
-          user: { 
+      getUser: async () => ({
+        data: {
+          user: {
             id: 'mock-user-id',
             email: 'mock@example.com',
             role: 'authenticated'
-          } 
+          }
         },
         error: null
       }),
       signOut: async () => ({ error: null }),
-      signInWithPassword: async () => ({ 
-        data: { 
-          user: { 
+      signInWithPassword: async () => ({
+        data: {
+          user: {
             id: 'mock-user-id',
             email: 'mock@example.com',
             role: 'authenticated'
-          } 
+          }
         },
         error: null
       }),
