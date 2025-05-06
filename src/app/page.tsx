@@ -1,10 +1,14 @@
-import { LoginDialog } from "@/components/auth/login-dialog";
-import { SignUpDialog } from "@/components/auth/signup-dialog";
-import { redirect } from "next/navigation";
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { createClientSupabaseClient } from "@/utils/supabase/simple-client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 // Helper function to check if user is admin
-async function isUserAdmin(email: string) {
+function isUserAdmin(email: string) {
   const adminEmails = [
     'elson@devots.com.my',
     'josephkwantum@gmail.com'
@@ -12,29 +16,85 @@ async function isUserAdmin(email: string) {
   return adminEmails.includes(email.toLowerCase());
 }
 
-async function getUser() {
-  const supabase = createClientSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
-}
+export default function Home() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-export default async function Home() {
-  // Check if user is logged in
-  const user = await getUser();
+  // Check if user is already logged in on page load
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const supabase = createClientSupabaseClient();
+        const { data } = await supabase.auth.getSession();
 
-  // If user is logged in, check role and redirect accordingly
-  if (user) {
-    // Check if user is admin
-    const isAdmin = await isUserAdmin(user.email || '');
+        if (data.session) {
+          console.log('User already has a session');
+          const userEmail = data.session.user.email || '';
+          const isAdmin = isUserAdmin(userEmail);
+          const redirectPath = isAdmin ? '/admin-layout/admin-dashboard' : '/agent-layout/agent/dashboard';
+          window.location.href = redirectPath;
+        } else {
+          console.log('No active session found');
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      }
+    };
 
-    if (isAdmin) {
-      // Redirect admin users to admin dashboard
-      redirect('/admin-layout/admin-dashboard');
-    } else {
-      // Redirect regular users to agent dashboard
-      redirect('/agent-layout/agent/dashboard');
+    checkSession();
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Login form submitted');
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      if (!email || !password) {
+        setErrorMessage('Please enter both email and password');
+        setIsLoading(false);
+        return;
+      }
+
+      // Create Supabase client with hardcoded credentials for Vercel deployment
+      const supabase = createClientSupabaseClient();
+      console.log('Supabase client created');
+
+      // Sign in with email and password
+      console.log('Attempting to sign in with:', { email });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      console.log('Sign in response:', { data: data ? 'exists' : 'null', error: error ? error.message : 'none' });
+
+      if (error) {
+        console.error('Login error:', error.message);
+        setErrorMessage(error.message || 'Failed to sign in. Please check your credentials.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if user is admin
+      const isAdmin = isUserAdmin(email.toLowerCase());
+      console.log('User is admin:', isAdmin);
+
+      // Navigate based on user role
+      const redirectPath = isAdmin ? '/admin-layout/admin-dashboard' : '/agent-layout/agent/dashboard';
+      console.log('Redirecting to:', redirectPath);
+
+      // Use window.location for a hard redirect instead of router.push
+      window.location.href = redirectPath;
+    } catch (error) {
+      console.error('Login error:', error);
+      setErrorMessage('An unexpected error occurred. Please try again.');
+      setIsLoading(false);
     }
-  }
+  };
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
       <div className="max-w-5xl w-full flex flex-col items-center justify-center text-center">
@@ -46,9 +106,49 @@ export default async function Home() {
             Your all-in-one platform for managing contacts and connections
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <LoginDialog />
-            <SignUpDialog />
+          <div className="max-w-md mx-auto w-full">
+            <form className="space-y-5 bg-card p-6 rounded-lg border" onSubmit={handleLogin}>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    placeholder="hi@yourcompany.com"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              {errorMessage && (
+                <div className="p-3 text-sm text-white bg-destructive rounded-md">
+                  {errorMessage}
+                </div>
+              )}
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Signing in..." : "Sign in"}
+              </Button>
+
+              <div className="text-center text-sm text-muted-foreground">
+                Don't have an account? <Button variant="link" className="p-0 h-auto" onClick={() => router.push('/signup')}>Sign up</Button>
+              </div>
+            </form>
           </div>
         </div>
 
