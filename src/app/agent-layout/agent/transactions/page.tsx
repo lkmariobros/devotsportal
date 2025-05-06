@@ -8,19 +8,18 @@ import { createServerSupabaseClient } from "@/utils/supabase/server"
 
 export const dynamic = 'force-dynamic'
 
-export default async function TransactionsPage({
-  searchParams = {}
-}: {
+export default async function TransactionsPage(props: {
   searchParams?: { status?: string; page?: string; search?: string }
 }) {
+  const searchParams = props.searchParams || {}
   // Get the current user
   const supabase = createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   // Get query parameters
-  const status = typeof searchParams.status === 'string' ? searchParams.status : undefined
-  const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page) : 1
-  const search = typeof searchParams.search === 'string' ? searchParams.search : undefined
+  const status = searchParams?.status ? String(searchParams.status) : undefined
+  const page = searchParams?.page ? parseInt(String(searchParams.page)) : 1
+  const search = searchParams?.search ? String(searchParams.search) : undefined
   const limit = 10
   const offset = (page - 1) * limit
 

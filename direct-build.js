@@ -390,17 +390,8 @@ function copyDir(src, dest) {
   }
 }
 
-// 1. Copy files from (admin) to admin-layout
-if (fs.existsSync('src/app/(admin)')) {
-  console.log('Copying files from src/app/(admin) to src/app/admin-layout');
-  copyDir('src/app/(admin)', 'src/app/admin-layout');
-}
-
-// 2. Copy files from (agent) to agent-layout
-if (fs.existsSync('src/app/(agent)')) {
-  console.log('Copying files from src/app/(agent) to src/app/agent-layout');
-  copyDir('src/app/(agent)', 'src/app/agent-layout');
-}
+// Admin and agent directories are now directly in admin-layout and agent-layout
+// No need to copy from parenthesized directories anymore
 
 // 3. Copy UI components from temp location
 if (fs.existsSync('temp-components/ui')) {

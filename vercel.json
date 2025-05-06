@@ -1,15 +1,25 @@
+
 {
   "version": 2,
-  "buildCommand": "node direct-build.js",
+  "buildCommand": "node prebuild.js && next build",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "regions": ["sin1"],
+  "outputDirectory": ".next",
   "env": {
-    "NEXT_PUBLIC_SUPABASE_URL": "https://drelzxbshewqkaznwhrn.supabase.co",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyZWx6eGJzaGV3cWthem53aHJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUyMTg0MjgsImV4cCI6MjA2MDc5NDQyOH0.NfbfbAS4x68A39znICZK4w4G7tIgAA3BxYZkrhnVRTQ",
-    "DISABLE_ESLINT_PLUGIN": "true",
     "NEXT_DISABLE_ESLINT": "1",
-    "NEXT_TELEMETRY_DISABLED": "1",
+    "DISABLE_ESLINT_PLUGIN": "true",
     "NEXT_TYPESCRIPT_CHECK": "0"
-  }
+  },
+  "builds": [
+    {
+      "src": "next.config.js",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
 }

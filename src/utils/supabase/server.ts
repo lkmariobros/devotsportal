@@ -2,12 +2,19 @@ import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { Database } from '@/types/supabase';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { SUPABASE_URL, SUPABASE_ANON_KEY, NODE_ENV } from '../../env-config.js';
 
 export function createServerSupabaseClient() {
   try {
-    // Create a direct client without relying on environment variables
-    return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Get environment variables
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase environment variables');
+    }
+
+    // Create a client using environment variables
+    return createClient<Database>(supabaseUrl, supabaseKey);
   } catch (error) {
     console.error('Error creating Supabase client:', error);
     throw error;
@@ -17,7 +24,7 @@ export function createServerSupabaseClient() {
 // Helper function to check if a user is an admin
 export async function isUserAdmin() {
   // During development, always return true
-  if (NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === 'development') {
     return true;
   }
 

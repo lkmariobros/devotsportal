@@ -1,7 +1,22 @@
 import { LoginDialog } from "@/components/auth/login-dialog";
 import { SignUpDialog } from "@/components/auth/signup-dialog";
+import { redirect } from "next/navigation";
+import { createServerSupabaseClient } from "@/utils/supabase/server";
 
-export default function Home() {
+async function getUser() {
+  const supabase = createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+}
+
+export default async function Home() {
+  // Check if user is logged in
+  const user = await getUser();
+
+  // If user is logged in, redirect to agent dashboard
+  if (user) {
+    redirect('/agent-layout/agent');
+  }
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
       <div className="max-w-5xl w-full flex flex-col items-center justify-center text-center">

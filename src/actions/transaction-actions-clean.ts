@@ -3,7 +3,7 @@
 import { createServerActionSupabaseClient } from '@/utils/supabase/server-action'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { submitTransactionFixed } from '@/utils/transaction-service-fixed'
+import { submitTransaction as submitTransactionService } from '@/utils/transaction-service'
 
 // Define the transaction submission schema
 const transactionSubmissionSchema = z.object({
@@ -23,7 +23,7 @@ const transactionSubmissionSchema = z.object({
   property_state: z.string().min(1, "State is required"),
   property_zip: z.string().min(1, "Zip code is required"),
   property_type: z.string().min(1, "Property type is required"),
-  
+
   // Client information
   primary_client_name: z.string().min(1, "Client name is required"),
   primary_client_email: z.string().email("Invalid email").optional().or(z.literal('')),
@@ -32,7 +32,7 @@ const transactionSubmissionSchema = z.object({
   primary_is_company: z.boolean().optional(),
   primary_company_name: z.string().optional().or(z.literal('')),
   primary_client_notes: z.string().optional().or(z.literal('')),
-  
+
   // Secondary client
   include_secondary_party: z.boolean().optional(),
   secondary_client_name: z.string().optional().or(z.literal('')),
@@ -42,7 +42,7 @@ const transactionSubmissionSchema = z.object({
   secondary_is_company: z.boolean().optional(),
   secondary_company_name: z.string().optional().or(z.literal('')),
   secondary_client_notes: z.string().optional().or(z.literal('')),
-  
+
   // Co-broking fields
   co_broking_enabled: z.boolean().default(false),
   co_agent_id: z.string().optional().or(z.literal('')),
@@ -68,10 +68,10 @@ export type TransactionSubmission = z.infer<typeof transactionSubmissionSchema>
 export async function submitTransaction(data: any) {
   try {
     console.log("[DEBUG] Received transaction data:", JSON.stringify(data, null, 2));
-    
-    // Use our fixed transaction service instead of the original implementation
+
+    // Use our transaction service instead of the original implementation
     // This properly handles UUID fields and other data types
-    return await submitTransactionFixed(data);
+    return await submitTransactionService(data);
   } catch (error) {
     console.error("Error in submitTransaction:", error)
     return {
@@ -201,10 +201,16 @@ export async function updateTransactionStatus(id: string, status: string, notes?
     }
 
     // Revalidate paths
-    revalidatePath("/agent-layout/transactions')
+    revalidatePath("/agent/transactions")
     revalidatePath(`/agent/transactions/${id}`)
-    revalidatePath("/admin-layout/transactions')
+    revalidatePath("/admin/transactions")
     revalidatePath(`/admin/transactions/${id}`)
+
+    // Also revalidate old paths for backward compatibility
+    revalidatePath("/agent-layout/transactions")
+    revalidatePath(`/agent-layout/transactions/${id}`)
+    revalidatePath("/admin-layout/admin-dashboard/transactions")
+    revalidatePath(`/admin-layout/admin-dashboard/transactions/${id}`)
 
     return { success: true, data: data[0] }
   } catch (error) {

@@ -25,8 +25,8 @@ interface TransactionListProps {
 export function TransactionList({ transactions, isAdmin = false }: TransactionListProps) {
   // Determine the new transaction link based on whether this is admin or agent view
   const newTransactionLink = isAdmin
-    ? "/admin-dashboard/transactions/new"
-    : "/agent-layout/transactions/new"
+    ? "/admin/transactions/new"
+    : "/agent/transactions/new"
 
   return (
     <div className="space-y-6">

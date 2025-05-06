@@ -13,7 +13,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { trpc } from "@/utils/trpc/client"
 import { Skeleton } from "@/components/ui/skeleton"
 import { RiSearchLine, RiAddLine, RiTeamLine, RiUserLine } from "@remixicon/react"
 import {
@@ -25,10 +24,25 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 
+// Import trpc dynamically to avoid server-side import
+// This ensures the import only happens on the client
+let trpc: any = null
+
 export default function TeamsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 8
+
+  // Use useEffect to dynamically import trpc on the client side only
+  // This is commented out for now as we're using mock data
+  /*
+  useEffect(() => {
+    // Dynamically import trpc only on the client side
+    import('@/utils/trpc/client').then((module) => {
+      trpc = module.trpc;
+    });
+  }, []);
+  */
 
   // Mock data - replace with actual trpc query when available
   const { data: teamsData, isLoading } = {
@@ -43,13 +57,13 @@ export default function TeamsPage() {
     },
     isLoading: false
   }
-  
+
   // Filter teams based on search query
-  const filteredTeams = teamsData?.teams.filter(team => 
+  const filteredTeams = teamsData?.teams.filter(team =>
     team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     team.leadName.toLowerCase().includes(searchQuery.toLowerCase())
   ) || []
-  
+
   // Pagination logic
   const totalPages = Math.ceil((filteredTeams.length || 0) / pageSize)
   const paginatedTeams = filteredTeams.slice(
@@ -66,7 +80,7 @@ export default function TeamsPage() {
           Create New Team
         </Button>
       </div>
-      
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -78,7 +92,7 @@ export default function TeamsPage() {
             <p className="text-xs text-muted-foreground">Active team roster</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Agents</CardTitle>
@@ -91,7 +105,7 @@ export default function TeamsPage() {
             <p className="text-xs text-muted-foreground">Across all teams</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
@@ -104,7 +118,7 @@ export default function TeamsPage() {
             <p className="text-xs text-muted-foreground">Year to date</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
@@ -118,7 +132,7 @@ export default function TeamsPage() {
           </CardContent>
         </Card>
       </div>
-      
+
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Teams List</h3>
         <div className="relative">
@@ -132,7 +146,7 @@ export default function TeamsPage() {
           />
         </div>
       </div>
-      
+
       <Card>
         <CardContent className="p-0">
           <Table>
@@ -184,17 +198,17 @@ export default function TeamsPage() {
           </Table>
         </CardContent>
       </Card>
-      
+
       {totalPages > 1 && (
         <Pagination>
           <PaginationContent>
             <PaginationItem>
-              <PaginationPrevious 
+              <PaginationPrevious
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 isDisabled={currentPage === 1}
               />
             </PaginationItem>
-            
+
             {Array.from({ length: totalPages }).map((_, i) => (
               <PaginationItem key={i}>
                 <PaginationLink
@@ -205,9 +219,9 @@ export default function TeamsPage() {
                 </PaginationLink>
               </PaginationItem>
             ))}
-            
+
             <PaginationItem>
-              <PaginationNext 
+              <PaginationNext
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 isDisabled={currentPage === totalPages}
               />

@@ -23,6 +23,18 @@ export async function getTransactions({
   try {
     console.log('[DEBUG] getTransactions called with:', { agentId, status, limit, offset, search })
 
+    // In development mode with placeholder env vars, return mock data
+    if (process.env.NODE_ENV === 'development' &&
+        (process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://your-supabase-project.supabase.co' ||
+         !process.env.NEXT_PUBLIC_SUPABASE_URL)) {
+      console.log('[DEBUG] Using mock data for transactions')
+      return {
+        success: true,
+        data: getMockTransactions(),
+        count: 5
+      }
+    }
+
     // Get the Supabase client
     const supabase = createServerSupabaseClient()
 
@@ -170,9 +182,9 @@ export async function updateTransactionStatus(
     }
 
     // Revalidate the transaction pages
-    revalidatePath('/admin-dashboard/transactions')
-    revalidatePath("/agent-layout/transactions')
-    revalidatePath(`/admin-dashboard/transactions/${id}`)
+    revalidatePath('/admin/transactions')
+    revalidatePath('/agent/transactions')
+    revalidatePath(`/admin/transactions/${id}`)
     revalidatePath(`/agent/transactions/${id}`)
 
     return {
@@ -252,11 +264,11 @@ export async function storeTransactionFromFallback(data: any) {
 
     // Revalidate the transaction pages with force option
     console.log('[DEBUG] Revalidating transaction pages')
-    revalidatePath('/admin-dashboard/transactions', 'page')
-    revalidatePath("/agent-layout/transactions', 'page')
+    revalidatePath('/admin/transactions', 'page')
+    revalidatePath('/agent/transactions', 'page')
 
     // Also revalidate the root paths to ensure layout updates
-    revalidatePath('/admin-dashboard', 'layout')
+    revalidatePath('/admin', 'layout')
     revalidatePath('/agent', 'layout')
 
     return {
@@ -271,4 +283,95 @@ export async function storeTransactionFromFallback(data: any) {
       error: error instanceof Error ? error.message : 'Unknown error'
     }
   }
+}
+
+// Mock data for development without Supabase
+function getMockTransactions() {
+  return [
+    {
+      id: '1',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      created_by: 'mock-agent-id',
+      status: 'pending',
+      transaction_type: 'SALE',
+      property_type: 'Condominium',
+      property_address: '123 Main Street, Kuala Lumpur',
+      property_price: 750000,
+      commission_amount: 22500,
+      primary_client_name: 'John Doe',
+      primary_client_email: 'john@example.com',
+      primary_client_phone: '+60123456789',
+      market_type: 'Secondary',
+      property_category: 'Residential'
+    },
+    {
+      id: '2',
+      created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+      updated_at: new Date(Date.now() - 86400000).toISOString(),
+      created_by: 'mock-agent-id',
+      status: 'completed',
+      transaction_type: 'RENTAL',
+      property_type: 'Landed',
+      property_address: '456 Park Avenue, Petaling Jaya',
+      property_price: 3500,
+      commission_amount: 1750,
+      primary_client_name: 'Jane Smith',
+      primary_client_email: 'jane@example.com',
+      primary_client_phone: '+60198765432',
+      market_type: 'Secondary',
+      property_category: 'Residential'
+    },
+    {
+      id: '3',
+      created_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+      updated_at: new Date(Date.now() - 172800000).toISOString(),
+      created_by: 'mock-agent-id',
+      status: 'pending',
+      transaction_type: 'SALE',
+      property_type: 'Commercial',
+      property_address: '789 Business Park, Kuala Lumpur',
+      property_price: 1200000,
+      commission_amount: 36000,
+      primary_client_name: 'Acme Corporation',
+      primary_client_email: 'contact@acme.com',
+      primary_client_phone: '+60323456789',
+      market_type: 'Primary',
+      property_category: 'Commercial'
+    },
+    {
+      id: '4',
+      created_at: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
+      updated_at: new Date(Date.now() - 259200000).toISOString(),
+      created_by: 'mock-agent-id',
+      status: 'rejected',
+      transaction_type: 'SALE',
+      property_type: 'Land',
+      property_address: 'Lot 123, Jalan Ampang, Kuala Lumpur',
+      property_price: 2500000,
+      commission_amount: 75000,
+      primary_client_name: 'Property Developers Sdn Bhd',
+      primary_client_email: 'info@propertydevelopers.com',
+      primary_client_phone: '+60312345678',
+      market_type: 'Secondary',
+      property_category: 'Land'
+    },
+    {
+      id: '5',
+      created_at: new Date(Date.now() - 345600000).toISOString(), // 4 days ago
+      updated_at: new Date(Date.now() - 345600000).toISOString(),
+      created_by: 'mock-agent-id',
+      status: 'completed',
+      transaction_type: 'RENTAL',
+      property_type: 'Condominium',
+      property_address: '101 Luxury Heights, Mont Kiara, Kuala Lumpur',
+      property_price: 5000,
+      commission_amount: 2500,
+      primary_client_name: 'Robert Johnson',
+      primary_client_email: 'robert@example.com',
+      primary_client_phone: '+60187654321',
+      market_type: 'Secondary',
+      property_category: 'Residential'
+    }
+  ]
 }

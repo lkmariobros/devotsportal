@@ -3,7 +3,7 @@
 import { createServerActionSupabaseClient } from '@/utils/supabase/server-action'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { submitTransactionFixed } from '@/utils/transaction-service-fixed'
+import { submitTransaction as submitTransactionService } from '@/utils/transaction-service'
 
 // Define the transaction submission schema
 const transactionSubmissionSchema = z.object({
@@ -72,9 +72,9 @@ export async function submitTransaction(data: any) {
   try {
     console.log("[DEBUG] Received transaction data:", JSON.stringify(data, null, 2));
 
-    // Use our fixed transaction service instead of the original implementation
+    // Use our transaction service instead of the original implementation
     // This properly handles UUID fields and other data types
-    return await submitTransactionFixed(data);
+    return await submitTransactionService(data);
 
     /* Original implementation commented out - keeping for reference
     // Create Supabase client using our custom function with hardcoded fallbacks
@@ -363,8 +363,8 @@ export async function updateTransactionStatus(id: string, status: string, notes?
     }
 
     // Revalidate the transactions list page
-    revalidatePath("/admin-layout/transactions')
-    revalidatePath(`/admin/transactions/${id}`)
+    revalidatePath("/admin-layout/transactions")
+    revalidatePath(`/admin-dashboard/transactions/${id}`)
 
     return { success: true, data: data[0] }
   } catch (error) {
@@ -373,4 +373,3 @@ export async function updateTransactionStatus(id: string, status: string, notes?
   }
 }
 
-// End of file

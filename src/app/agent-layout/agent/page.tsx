@@ -57,7 +57,7 @@ export default function AgentDashboard() {
         <h1 className="text-2xl font-bold tracking-tight">
           Welcome, {userName}
         </h1>
-        <Link href="/agent-layout/transactions/new">
+        <Link href="/agent/transactions/new">
           <Button>
             <RiAddLine className="mr-2 h-4 w-4" />
             New Transaction
@@ -94,7 +94,7 @@ export default function AgentDashboard() {
               ) : (
                 <div className="text-center py-6">
                   <p className="text-muted-foreground mb-4">No transactions found</p>
-                  <Link href="/agent-layout/transactions/new">
+                  <Link href="/agent/transactions/new">
                     <Button>
                       <RiAddLine className="mr-2 h-4 w-4" />
                       Create Your First Transaction

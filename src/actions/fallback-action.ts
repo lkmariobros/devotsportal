@@ -1,7 +1,6 @@
 "use server"
 
-import { storeTransactionFromFallback } from '@/utils/transaction-service-new';
-import { submitTransactionFixed } from '@/utils/transaction-service-fixed';
+import { submitTransaction } from '@/utils/transaction-service';
 
 /**
  * Fallback server action that doesn't rely on any external services
@@ -19,9 +18,9 @@ export async function fallbackSubmitTransaction(data: any) {
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Use our fixed transaction service instead of the original one
+    // Use our transaction service to handle the submission
     // This properly handles UUID fields and other data types
-    const result = await submitTransactionFixed(data);
+    const result = await submitTransaction(data);
 
     if (!result.success) {
       console.error("Error storing transaction:", result.error);

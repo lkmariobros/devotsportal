@@ -2,7 +2,7 @@
 
 import { AdminSidebarWrapper } from "@/components/ui/admin-sidebar-wrapper";
 import { Toaster } from "@/components/ui/sonner";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -45,7 +45,7 @@ export default function AdminLayout({
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="/admin-dashboard">
+                    <BreadcrumbLink href="/admin">
                       <RiScanLine size={22} aria-hidden="true" />
                       <span className="sr-only">Admin Dashboard</span>
                     </BreadcrumbLink>
@@ -62,7 +62,7 @@ export default function AdminLayout({
               <UserDropdown />
             </div>
           </header>
-          <div className="p-6 w-full">
+          <div className="w-full">
             {children}
             <Toaster />
           </div>

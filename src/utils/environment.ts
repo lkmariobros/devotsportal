@@ -1,4 +1,4 @@
-import { IS_PRODUCTION, IS_VERCEL, VERCEL_URL } from '../env-config.js'
+// Environment utility functions
 
 /**
  * Check if debug features should be enabled
@@ -6,14 +6,14 @@ import { IS_PRODUCTION, IS_VERCEL, VERCEL_URL } from '../env-config.js'
  */
 export const isDebugEnabled = () => {
   // Enable debug features in development or when explicitly allowed
-  return !IS_PRODUCTION || process.env.NEXT_PUBLIC_ENABLE_DEBUG === 'true'
+  return process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_DEBUG === 'true'
 }
 
 /**
  * Check if the application is running on Vercel
  */
 export const isVercel = () => {
-  return IS_VERCEL
+  return Boolean(process.env.VERCEL)
 }
 
 /**
@@ -21,15 +21,17 @@ export const isVercel = () => {
  * Uses Vercel URL in production, localhost in development
  */
 export const getBaseUrl = () => {
-  return VERCEL_URL
+  return process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : 'http://localhost:3000'
 }
 
 /**
  * Get the environment name
  */
 export const getEnvironmentName = () => {
-  if (IS_VERCEL) {
-    return IS_PRODUCTION ? 'production' : 'preview'
+  if (Boolean(process.env.VERCEL)) {
+    return process.env.NODE_ENV === 'production' ? 'production' : 'preview'
   }
   return 'development'
 }

@@ -20,14 +20,13 @@ import {
   SidebarMenuSubButton,
   SidebarRail,
   SidebarProvider,
-} from "@/components/reusable-ui/sidebar";
+} from "@/components/ui/sidebar";
 import {
   RiScanLine,
   RiBardLine,
   RiUserFollowLine,
   RiCodeSSlashLine,
   RiLoginCircleLine,
-  RiLayoutLeftLine,
   RiSettings3Line,
   RiLeafLine,
   RiLogoutBoxLine,
@@ -50,12 +49,12 @@ const adminNavData = {
       items: [
         {
           title: "Dashboard",
-          url: "/admin-dashboard",
+          url: "/admin",
           icon: RiScanLine,
         },
         {
           title: "Transactions",
-          url: "/admin-dashboard/transactions",
+          url: "/admin/transactions",
           icon: RiBardLine,
         },
         {
@@ -65,11 +64,11 @@ const adminNavData = {
           subItems: [
             {
               title: "Agents",
-              url: "/agents",
+              url: "/admin/agents",
             },
             {
               title: "Teams",
-              url: "/teams",
+              url: "/admin/teams",
             }
           ]
         }
@@ -81,12 +80,12 @@ const adminNavData = {
       items: [
         {
           title: "Settings",
-          url: "/admin-layout/settings",
+          url: "/admin/settings",
           icon: RiSettings3Line,
         },
         {
           title: "Help Center",
-          url: "/admin-layout/help",
+          url: "/admin/help",
           icon: RiLeafLine,
         },
       ],

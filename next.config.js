@@ -55,6 +55,15 @@ const nextConfig = {
         '@/utils/trpc/client': 'commonjs @/utils/trpc/client',
       }];
     }
+
+    // Add a fallback for the TRPC client
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        '@/utils/trpc/client': require.resolve('./src/utils/trpc/client.ts'),
+      };
+    }
+
     return config;
   },
 
@@ -63,30 +72,39 @@ const nextConfig = {
   skipTrailingSlashRedirect: true,
   skipMiddlewareUrlNormalize: true,
 
-  // Conditionally exclude debug pages in production
+  // URL rewrites for cleaner paths and backward compatibility
   async rewrites() {
-    // Only apply in production
-    if (process.env.NODE_ENV === 'production') {
-      return [
-        {
-          source: '/debug-:path*',
-          destination: '/404',
-        },
-        {
-          source: '/debug/:path*',
-          destination: '/404',
-        },
-        {
-          source: '/admin-dashboard/:path*',
-          destination: '/admin-layout',
-        },
-        {
-          source: '/admin-layout/admin-dashboard/:path*',
-          destination: '/admin-layout',
-        }
-      ];
-    }
-    return [];
+    return [
+      // Exclude debug pages in production
+      ...(process.env.NODE_ENV === 'production' ? [
+        { source: '/debug-:path*', destination: '/404' },
+        { source: '/debug/:path*', destination: '/404' },
+        { source: '/simple-transaction-form', destination: '/404' },
+        { source: '/:path*-fixed', destination: '/404' },
+      ] : []),
+
+      // Clean URLs for agent section
+      { source: '/agent', destination: '/agent-layout/agent/dashboard' },
+      { source: '/agent/dashboard', destination: '/agent-layout/agent/dashboard' },
+      { source: '/agent/transactions/:id', destination: '/agent-layout/agent/transactions/:id' },
+      { source: '/agent/transactions/new', destination: '/agent-layout/agent/transactions/new' },
+      { source: '/agent/transactions/success', destination: '/agent-layout/agent/transactions/success' },
+      { source: '/agent/clients', destination: '/agent-layout/agent/clients' },
+      { source: '/agent/profile', destination: '/agent-layout/agent/profile' },
+
+      // Clean URLs for admin section
+      { source: '/admin', destination: '/admin-layout/admin-dashboard' },
+      { source: '/admin/dashboard', destination: '/admin-layout/admin-dashboard' },
+      { source: '/admin/transactions/:id', destination: '/admin-layout/admin-dashboard/transactions/:id' },
+      { source: '/admin/agents', destination: '/admin-layout/admin-dashboard/agents' },
+      { source: '/admin/commission', destination: '/admin-layout/admin-dashboard/commission' },
+      { source: '/admin/commission-details', destination: '/admin-layout/admin-dashboard/commission-details' },
+
+      // Legacy URL support
+      { source: '/admin-dashboard/:path*', destination: '/admin-layout/admin-dashboard/:path*' },
+      { source: '/agent-layout/transactions', destination: '/agent-layout/agent/transactions' },
+      { source: '/agent-layout/transactions/new', destination: '/agent-layout/agent/transactions/new' },
+    ];
   },
 }
 

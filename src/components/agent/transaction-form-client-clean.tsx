@@ -112,7 +112,7 @@ function TransactionFormContent({
           toast.success("Transaction submitted successfully");
 
           // Redirect to transactions list
-          router.push("/agent-layout/transactions");
+          router.push("/agent/transactions");
         } else {
           // Show error message with more details
           const errorMessage = result && 'error' in result && result.error ?

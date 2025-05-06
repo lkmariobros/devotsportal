@@ -18,6 +18,11 @@ yarn-error.log*
 tsconfig.json
 tsconfig.*.json
 
+# Ignore debug files
+src/app/debug*
+src/app/simple-transaction-form
+src/app/*-fixed
+
 # Do not ignore these files
 !backup-components
 !direct-build.js

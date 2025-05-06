@@ -35,7 +35,7 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
   const pathname = usePathname();
 
   // Determine if we're currently in the admin dashboard
-  const isInAdminDashboard = pathname.includes("/admin-dashboard") || pathname.includes("/admin");
+  const isInAdminDashboard = pathname.includes("/admin-layout") || pathname.includes("/admin");
 
   // Store toast ID in a ref to ensure it persists across renders
   const toastIdRef = React.useRef<string | number | null>(null);
@@ -106,7 +106,7 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
       });
 
       // Navigate to admin dashboard
-      router.push("/admin-dashboard");
+      router.push("/admin-layout/admin-dashboard");
 
       // Reset navigation state after a delay
       setTimeout(() => {
@@ -143,7 +143,7 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
       });
 
       // Navigate to agent portal
-      router.push("/agent-layout/dashboard");
+      router.push("/agent-layout/agent/dashboard");
 
       // Reset navigation state after a delay
       setTimeout(() => {
