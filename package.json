@@ -6,9 +6,9 @@
     "dev": "next dev --turbopack",
     "prebuild": "node prebuild.js",
     "postbuild": "node postbuild.js",
-    "build": "./build.sh",
-    "vercel-build": "node prebuild.js && ./build.sh",
-    "test-build": "node simple-vercel-build.js",
+    "build": "next build --no-lint",
+    "vercel-build": "node final-vercel-build.mjs",
+    "test-build": "node final-vercel-build.mjs",
     "start": "next start",
     "lint": "next lint --no-error-on-unmatched-pattern"
   },
