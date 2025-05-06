@@ -1,25 +1,13 @@
-
 {
   "version": 2,
-  "buildCommand": "node prebuild.js && next build",
+  "buildCommand": "chmod +x build.sh && npm run vercel-build",
   "installCommand": "npm install",
   "framework": "nextjs",
   "outputDirectory": ".next",
   "env": {
     "NEXT_DISABLE_ESLINT": "1",
     "DISABLE_ESLINT_PLUGIN": "true",
-    "NEXT_TYPESCRIPT_CHECK": "0"
-  },
-  "builds": [
-    {
-      "src": "next.config.js",
-      "use": "@vercel/next"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ]
+    "NEXT_TYPESCRIPT_CHECK": "0",
+    "NEXT_DISABLE_STATIC_GENERATION": "true"
+  }
 }
