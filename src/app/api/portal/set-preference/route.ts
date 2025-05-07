@@ -47,12 +47,14 @@ export async function POST(request: NextRequest) {
     // Set the portal preference in a secure cookie
     const cookieStore = cookies();
     cookieStore.set('portal_preference', portal, {
-      httpOnly: true,
+      httpOnly: false, // Allow JavaScript access for debugging
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax', // Allow cross-site requests for better compatibility
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/',
     });
+
+    console.log(`Portal preference set to ${portal} for user ${user.email}`);
 
     // Return success response
     return NextResponse.json({ success: true });

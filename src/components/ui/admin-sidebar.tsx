@@ -259,6 +259,20 @@ export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <hr className="border-t border-border mx-2 -mt-px" />
         <SidebarMenu>
+          {/* Agent Portal Link */}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              className="font-medium gap-3 h-9 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground [&>svg]:size-auto"
+              onClick={() => window.location.href = "/agent-layout/agent/dashboard"}
+            >
+              <RiUserFollowLine
+                className="text-muted-foreground/60"
+                size={22}
+                aria-hidden="true"
+              />
+              <span>Switch to Agent Portal</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               className="font-medium gap-3 h-9 rounded-md bg-gradient-to-r hover:bg-transparent hover:from-sidebar-accent hover:to-sidebar-accent/40 data-[active=true]:from-primary/20 data-[active=true]:to-primary/5 [&>svg]:size-auto"

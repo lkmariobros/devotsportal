@@ -28,6 +28,7 @@ import {
 } from "@remixicon/react";
 import { usePathname } from "next/navigation";
 import { createClientSupabaseClient } from "@/utils/supabase/client";
+import { RiUserSettingsLine } from "@remixicon/react";
 
 // Agent navigation data
 const agentNavData = {
@@ -85,6 +86,31 @@ export function AgentSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const [activePath, setActivePath] = React.useState(pathname || "");
   const [isSigningOut, setIsSigningOut] = React.useState(false);
+  const [isAdmin, setIsAdmin] = React.useState(false);
+
+  // Check if user is admin
+  React.useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const supabase = createClientSupabaseClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+          // Check if user email is in admin list
+          const adminEmails = [
+            'elson@devots.com.my',
+            'josephkwantum@gmail.com'
+          ];
+
+          setIsAdmin(adminEmails.includes(user.email?.toLowerCase() || ''));
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+      }
+    };
+
+    checkAdminStatus();
+  }, []);
 
   React.useEffect(() => {
     setActivePath(pathname || "");
@@ -155,6 +181,22 @@ export function AgentSidebar(props: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <hr className="border-t border-border mx-2 -mt-px" />
         <SidebarMenu>
+          {/* Admin Portal Link for admins */}
+          {isAdmin && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                className="font-medium gap-3 h-9 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground [&>svg]:size-auto"
+                onClick={() => window.location.href = "/admin-layout/admin-dashboard"}
+              >
+                <RiUserSettingsLine
+                  className="text-muted-foreground/60"
+                  size={22}
+                  aria-hidden="true"
+                />
+                <span>Switch to Admin</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           <SidebarMenuItem>
             <SidebarMenuButton
               className="font-medium gap-3 h-9 rounded-md bg-gradient-to-r hover:bg-transparent hover:from-sidebar-accent hover:to-sidebar-accent/40 data-[active=true]:from-primary/20 data-[active=true]:to-primary/5 [&>svg]:size-auto"

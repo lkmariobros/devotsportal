@@ -13,6 +13,9 @@ export async function middleware(request: NextRequest) {
   // Get the portal preference from cookies
   const portalPreference = request.cookies.get('portal_preference')?.value || 'agent'
 
+  // Log the portal preference for debugging
+  console.log('Portal preference from cookie:', portalPreference)
+
   // Check if the request is for a protected route
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/admin-layout')
   const isAgentRoute = request.nextUrl.pathname.startsWith('/agent') || request.nextUrl.pathname.startsWith('/agent-layout')
@@ -40,8 +43,9 @@ export async function middleware(request: NextRequest) {
 
       const isAdmin = adminEmails.includes(user.email?.toLowerCase() || '')
 
-      // If user is not an admin, redirect based on their portal preference
+      // If user is not an admin, redirect to agent dashboard
       if (!isAdmin) {
+        console.log('Non-admin user attempting to access admin route, redirecting to agent dashboard')
         return NextResponse.redirect(new URL('/agent-layout/agent/dashboard', request.url))
       }
     }

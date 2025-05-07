@@ -79,9 +79,13 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
       // Update local state
       setCurrentPortal("admin");
 
-      // Navigate to admin dashboard using Next.js router (safely)
-      if (router) {
-        router.push("/admin-layout/admin-dashboard");
+      // Use window.location for a hard redirect to ensure navigation works
+      if (isBrowser) {
+        // Log the navigation attempt
+        console.log('Navigating to admin dashboard');
+
+        // Use window.location for a hard redirect
+        window.location.href = "/admin-layout/admin-dashboard";
       }
     } catch (error) {
       console.error("Error switching to admin portal:", error);
@@ -126,9 +130,13 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
       // Update local state
       setCurrentPortal("agent");
 
-      // Navigate to agent dashboard using Next.js router (safely)
-      if (router) {
-        router.push("/agent-layout/agent/dashboard");
+      // Use window.location for a hard redirect to ensure navigation works
+      if (isBrowser) {
+        // Log the navigation attempt
+        console.log('Navigating to agent dashboard');
+
+        // Use window.location for a hard redirect
+        window.location.href = "/agent-layout/agent/dashboard";
       }
     } catch (error) {
       console.error("Error switching to agent portal:", error);

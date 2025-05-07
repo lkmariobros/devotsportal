@@ -98,13 +98,35 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
     );
   }
 
-  // Use the portal context functions for switching portals
+  // Use the portal context functions for switching portals with fallback
   const handleAdminSwitch = () => {
-    switchToAdminPortal();
+    // Try to use the context function first
+    try {
+      switchToAdminPortal();
+    } catch (error) {
+      console.error('Error using context for admin switch:', error);
+
+      // Fallback: Direct navigation with window.location
+      if (isBrowser) {
+        toast.loading("Switching to Admin Dashboard...");
+        window.location.href = "/admin-layout/admin-dashboard";
+      }
+    }
   };
 
   const handleAgentPortalSwitch = () => {
-    switchToAgentPortal();
+    // Try to use the context function first
+    try {
+      switchToAgentPortal();
+    } catch (error) {
+      console.error('Error using context for agent switch:', error);
+
+      // Fallback: Direct navigation with window.location
+      if (isBrowser) {
+        toast.loading("Switching to Agent Portal...");
+        window.location.href = "/agent-layout/agent/dashboard";
+      }
+    }
   };
 
   // Admin view with dropdown functionality
