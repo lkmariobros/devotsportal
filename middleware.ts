@@ -3,19 +3,27 @@ import type { NextRequest } from 'next/server'
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 
 export async function middleware(request: NextRequest) {
-  // If this is a navigation with maintain_session=true, preserve session
-  if (request.nextUrl.searchParams.has('maintain_session')) {
-    console.log('Maintaining session for navigation')
-    // Allow the navigation without session checks
-    return NextResponse.next()
+  // Create the response first so we can manipulate headers
+  const res = NextResponse.next();
+
+  // Check if this is navigation between portals (admin to agent or vice versa)
+  const isPortalNavigation =
+    (request.nextUrl.pathname.startsWith('/agent') && request.headers.get('referer')?.includes('/admin')) ||
+    (request.nextUrl.pathname.startsWith('/admin') && request.headers.get('referer')?.includes('/agent'));
+
+  if (isPortalNavigation) {
+    console.log('Portal navigation detected - preserving session');
+    // For portal navigation, preserve ALL cookies from the request
+    const cookies = request.cookies.getAll();
+    cookies.forEach(cookie => {
+      res.cookies.set(cookie.name, cookie.value);
+    });
+    return res;
   }
 
-  // Create a Supabase client configured to use cookies
-  const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req: request, res })
-
-  // Refresh session if expired - required for Server Components
-  await supabase.auth.getSession()
+  // Continue with regular authentication checks for non-portal navigation
+  const supabase = createMiddlewareClient({ req: request, res });
+  await supabase.auth.getSession();
 
   // Check if the request is for a protected route
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/admin-layout')

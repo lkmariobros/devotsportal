@@ -99,20 +99,20 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
   }
 
   // Direct navigation handlers
-  const handleAdminSwitch = () => {
+  const handleAdminSwitch = (e) => {
+    if (e) e.preventDefault();
     console.log('Admin portal switch clicked');
-    // Direct navigation as fallback
-    if (isBrowser) {
-      window.location.href = "/admin-layout/admin-dashboard";
-    }
+
+    // Simple direct navigation
+    window.location.href = "/admin-layout/admin-dashboard";
   };
 
   const handleAgentPortalSwitch = (e) => {
-    e.preventDefault(); // Prevent default button behavior
+    if (e) e.preventDefault();
     console.log('Agent portal switch clicked');
 
-    // Use this exact URL with the query parameter to preserve session
-    window.location.href = "/agent-layout/agent/dashboard?maintain_session=true";
+    // Simple direct navigation
+    window.location.href = "/agent-layout/agent/dashboard";
   };
 
   // Admin view with dropdown functionality
