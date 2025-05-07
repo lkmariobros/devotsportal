@@ -103,7 +103,8 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
     if (e) e.preventDefault();
     console.log('Admin portal switch clicked');
 
-    // Simple direct navigation
+    // CRITICAL FIX: Direct navigation with no query parameters
+    // The middleware will detect this as portal navigation and preserve the session
     window.location.href = "/admin-layout/admin-dashboard";
   };
 
@@ -111,7 +112,8 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
     if (e) e.preventDefault();
     console.log('Agent portal switch clicked');
 
-    // Simple direct navigation
+    // CRITICAL FIX: Direct navigation with no query parameters
+    // The middleware will detect this as portal navigation and preserve the session
     window.location.href = "/agent-layout/agent/dashboard";
   };
 

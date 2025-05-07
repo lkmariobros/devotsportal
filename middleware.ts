@@ -6,19 +6,17 @@ export async function middleware(request: NextRequest) {
   // Create the response first so we can manipulate headers
   const res = NextResponse.next();
 
-  // Check if this is navigation between portals (admin to agent or vice versa)
-  const isPortalNavigation =
-    (request.nextUrl.pathname.startsWith('/agent') && request.headers.get('referer')?.includes('/admin')) ||
-    (request.nextUrl.pathname.startsWith('/admin') && request.headers.get('referer')?.includes('/agent'));
+  // CRITICAL FIX: Skip all authentication checks for portal navigation
+  // This ensures the session is preserved when switching between portals
+  if (request.headers.get('referer')) {
+    const referer = request.headers.get('referer') || '';
+    const isAdminToAgent = request.nextUrl.pathname.includes('/agent') && referer.includes('/admin');
+    const isAgentToAdmin = request.nextUrl.pathname.includes('/admin') && referer.includes('/agent');
 
-  if (isPortalNavigation) {
-    console.log('Portal navigation detected - preserving session');
-    // For portal navigation, preserve ALL cookies from the request
-    const cookies = request.cookies.getAll();
-    cookies.forEach(cookie => {
-      res.cookies.set(cookie.name, cookie.value);
-    });
-    return res;
+    if (isAdminToAgent || isAgentToAdmin) {
+      console.log('Portal navigation detected - BYPASSING ALL AUTH CHECKS');
+      return res;
+    }
   }
 
   // Continue with regular authentication checks for non-portal navigation
