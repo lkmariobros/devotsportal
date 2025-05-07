@@ -1,7 +1,15 @@
 import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
-import { PortalProvider } from "@/providers/portal-context";
+
+// Import the PortalProvider dynamically to avoid SSR issues
+import dynamic from 'next/dynamic';
+
+// Dynamically import the PortalProvider with SSR disabled
+const PortalProviderClient = dynamic(
+  () => import('@/providers/portal-provider'),
+  { ssr: false }
+);
 
 import "./globals.css";
 
@@ -24,10 +32,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <PortalProvider>
+          {/* Use the dynamically imported PortalProvider */}
+          <PortalProviderClient>
             {children}
             <Toaster />
-          </PortalProvider>
+          </PortalProviderClient>
         </ThemeProvider>
       </body>
     </html>

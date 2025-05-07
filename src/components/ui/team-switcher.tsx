@@ -3,8 +3,11 @@
 import * as React from "react";
 import Image from "next/image";
 import { toast } from "sonner";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { usePortal } from "@/providers/portal-context";
+
+// Detect if we're running in a browser environment
+const isBrowser = typeof window !== 'undefined';
 
 import {
   DropdownMenu,
@@ -31,11 +34,28 @@ interface TeamSwitcherProps {
 
 export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
   const [activeTeam, setActiveTeam] = React.useState(teams[0] ?? null);
-  const pathname = usePathname();
-  const { switchToAdminPortal, switchToAgentPortal, isLoading, currentPortal } = usePortal();
+  const [isNavigating, setIsNavigating] = React.useState(false);
+  const pathname = isBrowser ? usePathname() : '';
+  const router = isBrowser ? useRouter() : null;
+
+  // Safely use the portal context (might be undefined during SSR/SSG)
+  let portalContext;
+  try {
+    portalContext = usePortal();
+  } catch (error) {
+    // During SSR/SSG, provide fallback values
+    portalContext = {
+      currentPortal: 'agent',
+      switchToAdminPortal: () => {},
+      switchToAgentPortal: () => {},
+      isLoading: false
+    };
+  }
+
+  const { switchToAdminPortal, switchToAgentPortal, isLoading, currentPortal } = portalContext;
 
   // Determine if we're currently in the admin dashboard
-  const isInAdminDashboard = currentPortal === "admin" || pathname.includes("/admin-layout") || pathname.includes("/admin");
+  const isInAdminDashboard = pathname?.includes("/admin-layout") || pathname?.includes("/admin") || false;
 
   // Store toast ID in a ref to ensure it persists across renders
   const toastIdRef = React.useRef<string | number | null>(null);
