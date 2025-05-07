@@ -43,26 +43,25 @@ export default function Home() {
       const SUPABASE_URL = 'https://drelzxbshewqkaznwhrn.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyZWx6eGJzaGV3cWthem53aHJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUyMTg0MjgsImV4cCI6MjA2MDc5NDQyOH0.NfbfbAS4x68A39znICZK4w4G7tIgAA3BxYZkrhnVRTQ';
 
-      try {
-        const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({ email, password })
-        });
+      const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({ email, password })
+      });
 
-        const data = await response.json();
-        console.log('Sign in response:', data);
+      const data = await response.json();
+      console.log('Sign in response:', data);
 
-        if (!response.ok) {
-          console.error('Login error:', data.error || 'Authentication failed');
-          setErrorMessage(data.error_description || 'Failed to sign in. Please check your credentials.');
-          setIsLoading(false);
-          return;
-        }
+      if (!response.ok) {
+        console.error('Login error:', data.error || 'Authentication failed');
+        setErrorMessage(data.error_description || 'Failed to sign in. Please check your credentials.');
+        setIsLoading(false);
+        return;
+      }
 
       // Check if user is admin
       const isAdmin = isUserAdmin(email.toLowerCase());
