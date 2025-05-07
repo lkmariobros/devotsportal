@@ -107,12 +107,12 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
     }
   };
 
-  const handleAgentPortalSwitch = () => {
+  const handleAgentPortalSwitch = (e) => {
+    e.preventDefault(); // Prevent default button behavior
     console.log('Agent portal switch clicked');
-    // Direct navigation as fallback
-    if (isBrowser) {
-      window.location.href = "/agent-layout/agent/dashboard";
-    }
+
+    // Use this exact URL with the query parameter to preserve session
+    window.location.href = "/agent-layout/agent/dashboard?maintain_session=true";
   };
 
   // Admin view with dropdown functionality

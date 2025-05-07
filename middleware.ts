@@ -3,20 +3,19 @@ import type { NextRequest } from 'next/server'
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 
 export async function middleware(request: NextRequest) {
+  // If this is a navigation with maintain_session=true, preserve session
+  if (request.nextUrl.searchParams.has('maintain_session')) {
+    console.log('Maintaining session for navigation')
+    // Allow the navigation without session checks
+    return NextResponse.next()
+  }
+
   // Create a Supabase client configured to use cookies
   const res = NextResponse.next()
   const supabase = createMiddlewareClient({ req: request, res })
 
   // Refresh session if expired - required for Server Components
   await supabase.auth.getSession()
-
-  // Get the portal preference and user role from cookies
-  const portalPreference = request.cookies.get('portal_preference')?.value || 'agent'
-  const userRole = request.cookies.get('user_role')?.value
-
-  // Log the portal preference for debugging
-  console.log('Portal preference from cookie:', portalPreference)
-  console.log('User role from cookie:', userRole)
 
   // Check if the request is for a protected route
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/admin-layout')
