@@ -44,105 +44,45 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     setCurrentPortal(isAdminPath ? "admin" : "agent");
   }, [pathname]);
 
-  // Function to switch to admin portal (with SSR safety)
-  const switchToAdminPortal = async () => {
-    // No-op during SSR/SSG
-    if (!isBrowser || currentPortal === "admin" || isLoading) return;
-
-    setIsLoading(true);
-
-    // Show loading toast
-    const loadingToast = toast.loading("Switching to Admin Dashboard...");
+  // Function to switch to admin portal - direct navigation approach
+  const switchToAdminPortal = () => {
+    // Only run in browser
+    if (!isBrowser) return;
 
     try {
-      console.log('Setting admin portal preference via API');
+      console.log('Direct navigation to admin portal');
 
-      // Make a server request to set the portal preference in a secure cookie
-      const response = await fetch("/api/portal/set-preference", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ portal: "admin" }),
-      });
+      // Show a simple toast
+      toast.loading("Switching to Admin Dashboard...");
 
-      const responseData = await response.json();
-      console.log('Portal preference API response:', responseData);
-
-      if (!response.ok) {
-        throw new Error(responseData.error || "Failed to set portal preference");
-      }
-
-      // Dismiss loading toast
-      toast.dismiss(loadingToast);
-
-      // Show success toast
-      toast.success("Welcome to Admin Dashboard", {
-        description: "You now have access to admin features",
-      });
-
-      // Update local state
-      setCurrentPortal("admin");
-
-      // Navigate to admin dashboard
-      console.log('Navigating to admin dashboard');
+      // DIRECT navigation - no conditions, no complex checks
       window.location.href = "/admin-layout/admin-dashboard";
+
+      // Don't add any code after the navigation line - it won't execute
     } catch (error) {
-      console.error("Error switching to admin portal:", error);
+      console.error('Error switching to admin portal:', error);
       toast.error("Failed to switch portals. Please try again.");
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  // Function to switch to agent portal (with SSR safety)
-  const switchToAgentPortal = async () => {
-    // No-op during SSR/SSG
-    if (!isBrowser || currentPortal === "agent" || isLoading) return;
-
-    setIsLoading(true);
-
-    // Show loading toast
-    const loadingToast = toast.loading("Switching to Agent Portal...");
+  // Function to switch to agent portal - direct navigation approach
+  const switchToAgentPortal = () => {
+    // Only run in browser
+    if (!isBrowser) return;
 
     try {
-      console.log('Setting agent portal preference via API');
+      console.log('Direct navigation to agent portal');
 
-      // Make a server request to set the portal preference in a secure cookie
-      const response = await fetch("/api/portal/set-preference", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ portal: "agent" }),
-      });
+      // Show a simple toast
+      toast.loading("Switching to Agent Portal...");
 
-      const responseData = await response.json();
-      console.log('Portal preference API response:', responseData);
-
-      if (!response.ok) {
-        throw new Error(responseData.error || "Failed to set portal preference");
-      }
-
-      // Dismiss loading toast
-      toast.dismiss(loadingToast);
-
-      // Show success toast
-      toast.success("Welcome to Agent Portal", {
-        description: "You're now in the agent view",
-      });
-
-      // Update local state
-      setCurrentPortal("agent");
-
-      // Navigate to agent dashboard
-      console.log('Navigating to agent dashboard');
+      // DIRECT navigation - no conditions, no complex checks
       window.location.href = "/agent-layout/agent/dashboard";
+
+      // Don't add any code after the navigation line - it won't execute
     } catch (error) {
-      console.error("Error switching to agent portal:", error);
+      console.error('Error switching to agent portal:', error);
       toast.error("Failed to switch portals. Please try again.");
-    } finally {
-      setIsLoading(false);
     }
   };
 

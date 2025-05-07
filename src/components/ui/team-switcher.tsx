@@ -98,15 +98,21 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
     );
   }
 
-  // Simple handlers for portal switching
+  // Direct navigation handlers
   const handleAdminSwitch = () => {
     console.log('Admin portal switch clicked');
-    portalContext.switchToAdminPortal();
+    // Direct navigation as fallback
+    if (isBrowser) {
+      window.location.href = "/admin-layout/admin-dashboard";
+    }
   };
 
   const handleAgentPortalSwitch = () => {
     console.log('Agent portal switch clicked');
-    portalContext.switchToAgentPortal();
+    // Direct navigation as fallback
+    if (isBrowser) {
+      window.location.href = "/agent-layout/agent/dashboard";
+    }
   };
 
   // Admin view with dropdown functionality
