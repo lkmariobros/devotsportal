@@ -98,62 +98,31 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
     );
   }
 
-  // COMPLETELY NEW APPROACH: Use form submission for portal switching
-  // This bypasses client-side routing entirely and uses a traditional form POST
+  // SIMPLIFIED APPROACH: Direct navigation with cookie setting
   const handleAdminSwitch = (e) => {
     if (e) e.preventDefault();
     console.log('Admin portal switch clicked');
 
-    // Create a form element
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '/api/portal/switch';
+    // Set cookies directly in the browser
+    document.cookie = `portal_preference=admin; path=/; max-age=${60 * 60 * 24 * 30}`;
+    document.cookie = `user_role=admin; path=/; max-age=${60 * 60 * 24 * 30}`;
+    document.cookie = `portal_switch=true; path=/; max-age=60`;
 
-    // Add hidden input for portal type
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'portal';
-    input.value = 'admin';
-    form.appendChild(input);
-
-    // Add hidden input for redirect URL
-    const redirectInput = document.createElement('input');
-    redirectInput.type = 'hidden';
-    redirectInput.name = 'redirectUrl';
-    redirectInput.value = '/admin-layout/admin-dashboard';
-    form.appendChild(redirectInput);
-
-    // Add the form to the document and submit it
-    document.body.appendChild(form);
-    form.submit();
+    // Direct navigation
+    window.location.href = '/admin-layout/admin-dashboard';
   };
 
   const handleAgentPortalSwitch = (e) => {
     if (e) e.preventDefault();
     console.log('Agent portal switch clicked');
 
-    // Create a form element
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '/api/portal/switch';
+    // Set cookies directly in the browser
+    document.cookie = `portal_preference=agent; path=/; max-age=${60 * 60 * 24 * 30}`;
+    document.cookie = `user_role=agent; path=/; max-age=${60 * 60 * 24 * 30}`;
+    document.cookie = `portal_switch=true; path=/; max-age=60`;
 
-    // Add hidden input for portal type
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'portal';
-    input.value = 'agent';
-    form.appendChild(input);
-
-    // Add hidden input for redirect URL
-    const redirectInput = document.createElement('input');
-    redirectInput.type = 'hidden';
-    redirectInput.name = 'redirectUrl';
-    redirectInput.value = '/agent-layout/agent/dashboard';
-    form.appendChild(redirectInput);
-
-    // Add the form to the document and submit it
-    document.body.appendChild(form);
-    form.submit();
+    // Direct navigation
+    window.location.href = '/agent-layout/agent/dashboard';
   };
 
   // Admin view with dropdown functionality
