@@ -52,7 +52,7 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
     };
   }
 
-  const { switchToAdminPortal, switchToAgentPortal, isLoading, currentPortal } = portalContext;
+  const { isLoading, currentPortal } = portalContext;
 
   // Determine if we're currently in the admin dashboard
   const isInAdminDashboard = pathname?.includes("/admin-layout") || pathname?.includes("/admin") || false;
@@ -98,17 +98,15 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
     );
   }
 
-  // Use the portal context functions for switching portals
-  const { switchToAdminPortal, switchToAgentPortal, isLoading } = portalContext;
-
+  // Simple handlers for portal switching
   const handleAdminSwitch = () => {
     console.log('Admin portal switch clicked');
-    switchToAdminPortal();
+    portalContext.switchToAdminPortal();
   };
 
   const handleAgentPortalSwitch = () => {
     console.log('Agent portal switch clicked');
-    switchToAgentPortal();
+    portalContext.switchToAgentPortal();
   };
 
   // Admin view with dropdown functionality
