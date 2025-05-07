@@ -98,23 +98,62 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
     );
   }
 
-  // Direct navigation handlers
+  // COMPLETELY NEW APPROACH: Use form submission for portal switching
+  // This bypasses client-side routing entirely and uses a traditional form POST
   const handleAdminSwitch = (e) => {
     if (e) e.preventDefault();
     console.log('Admin portal switch clicked');
 
-    // CRITICAL FIX: Direct navigation with no query parameters
-    // The middleware will detect this as portal navigation and preserve the session
-    window.location.href = "/admin-layout/admin-dashboard";
+    // Create a form element
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/api/portal/switch';
+
+    // Add hidden input for portal type
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'portal';
+    input.value = 'admin';
+    form.appendChild(input);
+
+    // Add hidden input for redirect URL
+    const redirectInput = document.createElement('input');
+    redirectInput.type = 'hidden';
+    redirectInput.name = 'redirectUrl';
+    redirectInput.value = '/admin-layout/admin-dashboard';
+    form.appendChild(redirectInput);
+
+    // Add the form to the document and submit it
+    document.body.appendChild(form);
+    form.submit();
   };
 
   const handleAgentPortalSwitch = (e) => {
     if (e) e.preventDefault();
     console.log('Agent portal switch clicked');
 
-    // CRITICAL FIX: Direct navigation with no query parameters
-    // The middleware will detect this as portal navigation and preserve the session
-    window.location.href = "/agent-layout/agent/dashboard";
+    // Create a form element
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/api/portal/switch';
+
+    // Add hidden input for portal type
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'portal';
+    input.value = 'agent';
+    form.appendChild(input);
+
+    // Add hidden input for redirect URL
+    const redirectInput = document.createElement('input');
+    redirectInput.type = 'hidden';
+    redirectInput.name = 'redirectUrl';
+    redirectInput.value = '/agent-layout/agent/dashboard';
+    form.appendChild(redirectInput);
+
+    // Add the form to the document and submit it
+    document.body.appendChild(form);
+    form.submit();
   };
 
   // Admin view with dropdown functionality

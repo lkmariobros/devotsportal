@@ -6,17 +6,34 @@ export async function middleware(request: NextRequest) {
   // Create the response first so we can manipulate headers
   const res = NextResponse.next();
 
-  // CRITICAL FIX: Skip all authentication checks for portal navigation
-  // This ensures the session is preserved when switching between portals
-  if (request.headers.get('referer')) {
-    const referer = request.headers.get('referer') || '';
-    const isAdminToAgent = request.nextUrl.pathname.includes('/agent') && referer.includes('/admin');
-    const isAgentToAdmin = request.nextUrl.pathname.includes('/admin') && referer.includes('/agent');
+  // COMPLETELY NEW APPROACH: Check for portal_switch cookie
+  // If present, this is a navigation from the portal switch API
+  const portalSwitch = request.cookies.get('portal_switch');
+  if (portalSwitch?.value === 'true') {
+    console.log('Portal switch detected - BYPASSING ALL AUTH CHECKS');
 
-    if (isAdminToAgent || isAgentToAdmin) {
-      console.log('Portal navigation detected - BYPASSING ALL AUTH CHECKS');
-      return res;
-    }
+    // Copy all cookies from the request to the response
+    const allCookies = request.cookies.getAll();
+    allCookies.forEach(cookie => {
+      res.cookies.set(cookie.name, cookie.value, {
+        httpOnly: cookie.httpOnly,
+        secure: cookie.secure,
+        sameSite: cookie.sameSite as any,
+        maxAge: cookie.maxAge,
+        path: cookie.path,
+      });
+    });
+
+    // Clear the portal_switch cookie
+    res.cookies.set('portal_switch', '', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 0, // Expire immediately
+      path: '/',
+    });
+
+    return res;
   }
 
   // Continue with regular authentication checks for non-portal navigation
