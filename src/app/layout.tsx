@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
+import { PortalProvider } from "@/providers/portal-context";
 
 import "./globals.css";
 
@@ -23,8 +24,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster />
+          <PortalProvider>
+            {children}
+            <Toaster />
+          </PortalProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -27,15 +27,25 @@ export default async function AgentLayout({
         redirect("/")
       }
 
-      // Verify user is an agent
+      // For admin users, we'll allow access to agent portal
+      // This is necessary for the portal-switching functionality
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single()
 
-      if (!profile || profile.role !== 'agent') {
-        console.error('User is not an agent');
+      // Check if user is an admin (they can access both portals)
+      const adminEmails = [
+        'elson@devots.com.my',
+        'josephkwantum@gmail.com'
+      ];
+
+      const isAdmin = adminEmails.includes(user.email?.toLowerCase() || '');
+
+      // If not admin and not agent, redirect to unauthorized
+      if (!isAdmin && (!profile || profile.role !== 'agent')) {
+        console.error('User is not authorized to access agent portal');
         redirect("/unauthorized")
       }
     } catch (error) {

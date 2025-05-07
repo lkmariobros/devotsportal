@@ -3,7 +3,8 @@
 import * as React from "react";
 import Image from "next/image";
 import { toast } from "sonner";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { usePortal } from "@/providers/portal-context";
 
 import {
   DropdownMenu,
@@ -30,12 +31,11 @@ interface TeamSwitcherProps {
 
 export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
   const [activeTeam, setActiveTeam] = React.useState(teams[0] ?? null);
-  const [isNavigating, setIsNavigating] = React.useState(false);
-  const router = useRouter();
   const pathname = usePathname();
+  const { switchToAdminPortal, switchToAgentPortal, isLoading, currentPortal } = usePortal();
 
   // Determine if we're currently in the admin dashboard
-  const isInAdminDashboard = pathname.includes("/admin-layout") || pathname.includes("/admin");
+  const isInAdminDashboard = currentPortal === "admin" || pathname.includes("/admin-layout") || pathname.includes("/admin");
 
   // Store toast ID in a ref to ensure it persists across renders
   const toastIdRef = React.useRef<string | number | null>(null);
@@ -78,78 +78,13 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
     );
   }
 
+  // Use the portal context functions for switching portals
   const handleAdminSwitch = () => {
-    // Prevent multiple navigations
-    if (isNavigating) return;
-
-    setIsNavigating(true);
-
-    // Dismiss any existing toasts first
-    toast.dismiss();
-
-    // Create a loading toast with an ID
-    toastIdRef.current = toast.loading("Switching to Dashboard...", {
-      duration: 3000,
-    });
-
-    // Short timeout to show the loading toast before redirecting
-    setTimeout(() => {
-      // Dismiss the loading toast
-      if (toastIdRef.current) {
-        toast.dismiss(toastIdRef.current);
-      }
-
-      // Show success toast
-      toast.success("Welcome to Admin Dashboard", {
-        description: "You now have access to admin features",
-        id: "admin-success-toast", // Use a unique ID to prevent duplicates
-      });
-
-      // Navigate to admin dashboard
-      router.push("/admin-layout/admin-dashboard");
-
-      // Reset navigation state after a delay
-      setTimeout(() => {
-        setIsNavigating(false);
-      }, 1000);
-    }, 800);
+    switchToAdminPortal();
   };
 
   const handleAgentPortalSwitch = () => {
-    // Prevent multiple navigations
-    if (isNavigating) return;
-
-    setIsNavigating(true);
-
-    // Dismiss any existing toasts first
-    toast.dismiss();
-
-    // Create a loading toast with an ID
-    toastIdRef.current = toast.loading("Switching to Agent Portal...", {
-      duration: 3000,
-    });
-
-    // Short timeout to show the loading toast before redirecting
-    setTimeout(() => {
-      // Dismiss the loading toast
-      if (toastIdRef.current) {
-        toast.dismiss(toastIdRef.current);
-      }
-
-      // Show success toast
-      toast.success("Welcome to Agent Portal", {
-        description: "You're now in the agent view",
-        id: "agent-success-toast", // Use a unique ID to prevent duplicates
-      });
-
-      // Navigate to agent portal
-      router.push("/agent-layout/agent/dashboard");
-
-      // Reset navigation state after a delay
-      setTimeout(() => {
-        setIsNavigating(false);
-      }, 1000);
-    }, 800);
+    switchToAgentPortal();
   };
 
   // Admin view with dropdown functionality
@@ -199,6 +134,7 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
               <DropdownMenuItem
                 onClick={handleAgentPortalSwitch}
                 className="gap-2 p-2"
+                disabled={isLoading}
               >
                 <div className="flex size-6 items-center justify-center rounded-md overflow-hidden bg-primary text-primary-foreground">
                   <svg
@@ -223,6 +159,7 @@ export function TeamSwitcher({ teams, isAdmin = false }: TeamSwitcherProps) {
               <DropdownMenuItem
                 onClick={handleAdminSwitch}
                 className="gap-2 p-2"
+                disabled={isLoading}
               >
                 <div className="flex size-6 items-center justify-center rounded-md overflow-hidden bg-primary text-primary-foreground">
                   <svg
