@@ -44,12 +44,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Set the portal preference in a secure cookie
+    // Set the portal preference in a cookie that can be accessed by JavaScript
     const cookieStore = cookies();
     cookieStore.set('portal_preference', portal, {
-      httpOnly: false, // Allow JavaScript access for debugging
+      httpOnly: false, // Allow JavaScript access
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax', // Allow cross-site requests for better compatibility
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: '/',
+    });
+
+    // Also store the user's role for access control
+    cookieStore.set('user_role', portal === 'admin' ? 'admin' : 'agent', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/',
     });

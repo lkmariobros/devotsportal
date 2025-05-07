@@ -10,11 +10,13 @@ export async function middleware(request: NextRequest) {
   // Refresh session if expired - required for Server Components
   await supabase.auth.getSession()
 
-  // Get the portal preference from cookies
+  // Get the portal preference and user role from cookies
   const portalPreference = request.cookies.get('portal_preference')?.value || 'agent'
+  const userRole = request.cookies.get('user_role')?.value
 
   // Log the portal preference for debugging
   console.log('Portal preference from cookie:', portalPreference)
+  console.log('User role from cookie:', userRole)
 
   // Check if the request is for a protected route
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/admin-layout')
@@ -46,7 +48,18 @@ export async function middleware(request: NextRequest) {
       // If user is not an admin, redirect to agent dashboard
       if (!isAdmin) {
         console.log('Non-admin user attempting to access admin route, redirecting to agent dashboard')
-        return NextResponse.redirect(new URL('/agent-layout/agent/dashboard', request.url))
+
+        // Set portal preference cookie before redirecting
+        const redirectResponse = NextResponse.redirect(new URL('/agent-layout/agent/dashboard', request.url))
+        redirectResponse.cookies.set('portal_preference', 'agent', {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 30, // 30 days
+          path: '/',
+        })
+
+        return redirectResponse
       }
     }
 

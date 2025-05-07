@@ -55,6 +55,8 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     const loadingToast = toast.loading("Switching to Admin Dashboard...");
 
     try {
+      console.log('Setting admin portal preference via API');
+
       // Make a server request to set the portal preference in a secure cookie
       const response = await fetch("/api/portal/set-preference", {
         method: "POST",
@@ -64,8 +66,11 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ portal: "admin" }),
       });
 
+      const responseData = await response.json();
+      console.log('Portal preference API response:', responseData);
+
       if (!response.ok) {
-        throw new Error("Failed to set portal preference");
+        throw new Error(responseData.error || "Failed to set portal preference");
       }
 
       // Dismiss loading toast
@@ -79,14 +84,9 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
       // Update local state
       setCurrentPortal("admin");
 
-      // Use window.location for a hard redirect to ensure navigation works
-      if (isBrowser) {
-        // Log the navigation attempt
-        console.log('Navigating to admin dashboard');
-
-        // Use window.location for a hard redirect
-        window.location.href = "/admin-layout/admin-dashboard";
-      }
+      // Navigate to admin dashboard
+      console.log('Navigating to admin dashboard');
+      window.location.href = "/admin-layout/admin-dashboard";
     } catch (error) {
       console.error("Error switching to admin portal:", error);
       toast.error("Failed to switch portals. Please try again.");
@@ -106,6 +106,8 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     const loadingToast = toast.loading("Switching to Agent Portal...");
 
     try {
+      console.log('Setting agent portal preference via API');
+
       // Make a server request to set the portal preference in a secure cookie
       const response = await fetch("/api/portal/set-preference", {
         method: "POST",
@@ -115,8 +117,11 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ portal: "agent" }),
       });
 
+      const responseData = await response.json();
+      console.log('Portal preference API response:', responseData);
+
       if (!response.ok) {
-        throw new Error("Failed to set portal preference");
+        throw new Error(responseData.error || "Failed to set portal preference");
       }
 
       // Dismiss loading toast
@@ -130,14 +135,9 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
       // Update local state
       setCurrentPortal("agent");
 
-      // Use window.location for a hard redirect to ensure navigation works
-      if (isBrowser) {
-        // Log the navigation attempt
-        console.log('Navigating to agent dashboard');
-
-        // Use window.location for a hard redirect
-        window.location.href = "/agent-layout/agent/dashboard";
-      }
+      // Navigate to agent dashboard
+      console.log('Navigating to agent dashboard');
+      window.location.href = "/agent-layout/agent/dashboard";
     } catch (error) {
       console.error("Error switching to agent portal:", error);
       toast.error("Failed to switch portals. Please try again.");
